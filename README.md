@@ -4,8 +4,9 @@ A PDP11/40 emulator that will run Unix v5/v6
 Introduction and acknowledgements:
 
 This is an updated version of Dave Cheney's CPP11 https://github.com/davecheney/cpp11 which will run on a Pi Pico.
-For this project I have selected the Sparkfun Thing Plus board which contains an RP2040 chip, and sd card and 16Mb flash.
+For this project I have selected the Sparkfun Thing Plus board which contains an RP2040 chip, an SD card and 16Mb flash.
 See https://www.sparkfun.com/products/17745.
+Other hardware may be used including a Pi Pico itself. Wire the SDCard as per the Sparkfun schematic.
 The SD card interface uses Karl Kugler's app (https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico) which is included in the repo.
 The project environment is for Visual Studio Code. The Pico SDK is also required https://github.com/raspberrypi/pico-sdk. This is not included.
 
@@ -30,7 +31,7 @@ The app is provided as a Visual Studio Code project. Firstly, a copy of the Pico
 The path to the SDK will need to be setup on your system. Also, GCC of at least version 10 is required. This may need to be installed and
 selected as the active kit. The build process will create a .uf2 binary in the build directory. This can be copied to the RP2040 via the
 virtual drive presented by the RP2040 boot system.
-Any number of RK05 disk images should be copied to the root of an SDCard formatted to FAT32. I use a 32Gb card and the SPI system works with this.
+Any number of RK05 disk images may be copied to the root of an SDCard formatted to FAT32. I use a 32Gb card and the SPI system works with this.
 The images are in the same format as used by Simh and may be built or modified in Simh prior to use.
 
 Booting:
