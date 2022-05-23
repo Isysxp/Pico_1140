@@ -22,6 +22,7 @@ uses translation of DEC floating point to IEEE 754.
 The app is sufficiently accurate to run RT11 V3/V4, Unix V5 and V6 and mini-unix (http://www.tavi.co.uk/unixhistory/mini-unix.html). I would note
 that the floating point performance for Unix is rather slow. It will also run MINC Basic for which I have included an RK05 image
 which has the limitation that some command will return to the RT11 . prompt. The original version uses a modified RX02 monitor.
+There is a KW11 line time clock. The implementation is not good and system time will not be accurate.
 
 Building:
 
