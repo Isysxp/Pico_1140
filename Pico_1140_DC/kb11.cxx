@@ -17,7 +17,7 @@ void KB11::reset(uint16_t start) {
     R[7] = start;
     stacklimit = 0xff;
     switchregister = 0173030;
-    //switchregister = 7;
+    //switchregister = 01;
     unibus.reset();
     wtstate = false;
 }

@@ -15,10 +15,7 @@ class KT11 {
             return a > 0167777 ? ((uint32_t)a) + 0600000 : a;
         }
         const auto i = (a >> 13);
-        int j;
-        if ( a == 030060)
-            j = 0;
-
+ 
         if (wr && !pages[mode][i].write()) {
             SR[0] = (1 << 13) | 1;
             SR[0] |= (a >> 12) & ~1;
@@ -75,8 +72,8 @@ class KT11 {
 
         inline uint32_t addr() { return par & 07777; }
         inline uint8_t len() { return (pdr >> 8) & 0x7f; }
-        inline bool read() { return pdr & 2; }
-        inline bool write() { return pdr & 6; };
+        inline bool read() { return (pdr & 2) == 2; }
+        inline bool write() { return (pdr & 6) == 6; };
         inline bool ed() { return pdr & 8; }
     };
 

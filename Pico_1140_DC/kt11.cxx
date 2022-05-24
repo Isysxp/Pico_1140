@@ -29,22 +29,25 @@ void KT11::write16(const uint32_t a, const uint16_t v) {
     const auto i = ((a & 017) >> 1);
     switch (a & ~037) {
     case 0772200:
-        pages[01][i].pdr = v;
+        pages[01][i].pdr = v & 077416;
         break;
     case 0772240:
-        pages[01][i].par = v;
+        pages[01][i].par = v & 07777;
+        pages[01][i].pdr &= ~0100;
         break;
     case 0772300:
-        pages[00][i].pdr = v;
+        pages[00][i].pdr = v & 077416;
         break;
     case 0772340:
-        pages[00][i].par = v;
+        pages[00][i].par = v & 07777;
+        pages[00][i].pdr &= ~0100;
         break;
     case 0777600:
-        pages[03][i].pdr = v;
+        pages[03][i].pdr = v & 077416;
         break;
     case 0777640:
-        pages[03][i].par = v;
+        pages[03][i].par = v & 07777;
+        pages[03][i].pdr &= ~0100;
         break;
     default:
         printf("mmu::write16 write to invalid address %06o\n", a);

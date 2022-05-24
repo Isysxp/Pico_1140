@@ -299,12 +299,12 @@ class KB11 {
         const auto da = DA<l>(instr);
         const auto dst = read<l>(da);
         auto uval = src | dst;
-        write<l>(da, uval);
         PSW &= 0xFFF1;
         setZ(uval == 0);
         if (uval & msb<l>()) {
             PSW |= FLAGN;
         }
+        write<l>(da, uval);
     }
 
     // CLR 0050DD, CLRB 1050DD

@@ -98,4 +98,5 @@ void UNIBUS::reset() {
     rk11.reset();
     kw11.write16(0777546, 0x00); // disable line clock INTR
     lp11.reset();
+    cpu.mmu.SR[0]=0;
 }
