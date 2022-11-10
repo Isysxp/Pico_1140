@@ -821,7 +821,9 @@ void KB11::interrupt(uint8_t vec, uint8_t pri) {
         }
     }
     if (i >= itab.size()) {
-        printf("interrupt table full\n");
+        printf("interrupt table full:%d\n",i);
+        for (i=0; i < itab.size(); i++)
+          printf("%o %d:%d\r\n",itab[i].vec,i,itab.size());
         std::abort();
     }
     for (uint8_t j = i + 1; j < itab.size(); j++) {

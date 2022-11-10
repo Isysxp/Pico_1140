@@ -57,6 +57,7 @@ void RK11::step() {
         return;
     }
 
+
     switch ((rkcs >> 1) & 7) {
     case 0:
         // controller reset
@@ -64,19 +65,6 @@ void RK11::step() {
         break;
     case 1: // write
     case 2: // read
-    case 3: // check
-        if (drive != 0) {
-            rker |= 0x8080; // NXD
-            break;
-        }
-        if (cylinder > 0312) {
-            rker |= 0x8040; // NXC
-            break;
-        }
-        if (sector > 013) {
-            rker |= 0x8020; // NXS
-            break;
-        }
         rknotready();
         seek();
         readwrite();
@@ -85,10 +73,18 @@ void RK11::step() {
         rker = 0;
         [[fallthrough]];
     case 4: // Seek (and drive reset) - complete immediately
+        rknotready();
+        if (drive != 0) {
+            rker |= 0x80; // NXD
+            rkcs &= ~1;
+        	cpu.interrupt(INTRK, 5);
+            return;
+        }
         seek();
         rkcs &= ~0x2000; // Clear search complete - reset by rk11_seekEnd
         rkcs |= 0x80;    // set done - ready to accept new command
-        cpu.interrupt(INTRK, 5);
+	    if (rkcs & (1 << 6))
+        	cpu.interrupt(INTRK, 5);
         break;
     case 5: // Read Check
         break;
@@ -169,9 +165,7 @@ void RK11::write16(const uint32_t a, const uint16_t v) {
     // printf("rk11:write16: %06o %06o\n", a, v);
     switch (a) {
     case 0777404:
-        rkcs =
-            (v & ~0xf080) | (rkcs & 0xf080); // Bits 7 and 12 - 15 are read only
-
+        rkcs =  (v & ~0xf080) | (rkcs & 0xf080); // Bits 7 and 12 - 15 are read only
         break;
     case 0777406:
         rkwc = v;

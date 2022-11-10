@@ -147,7 +147,7 @@ void loop0() {
             return; // exit from loop to reset trapbuf
         }
         cpu.unibus.rk11.step();
-        if (kbdelay++ == 1000) {
+        if (kbdelay++ == 500) {
             cpu.unibus.cons.poll();
             kbdelay = 0;
         }
