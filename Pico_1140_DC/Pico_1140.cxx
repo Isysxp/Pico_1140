@@ -14,7 +14,7 @@ int startup(int argc, char *argv);
 using namespace std;
 char *ReadLine(bool fullDuplex = true, char lineBreak = '\n');
 
-string Fnames[20];
+string Fnames[32];
 int SelFile;
 
 // List contents of SDCard.

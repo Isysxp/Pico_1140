@@ -10,10 +10,12 @@
 #include "f_util.h"
 #include "avr11.h"
 #include "kb11.h"
+#include "pico/stdlib.h"
 
 KB11 cpu;
 int kbdelay = 0;
 int clkdelay = 0;
+uint64_t systime,nowtime,clkdiv;
 FIL bload;
 
 /* Binary loader.
@@ -118,6 +120,8 @@ void setup(char *disk) {
 		printf("f_open(%s) error: %s (%d)\n", disk, FRESULT_str(fr), fr);
 		while (1) ;
 	}
+    clkdiv = (uint64_t)1000000 / (uint64_t)60;
+    systime = time_us_64();
 	cpu.reset(02002);
     printf("Ready\n");
     
@@ -140,7 +144,7 @@ void loop() {
 
 void loop0() {
     while (true) {
-        cpu.step();
+            cpu.step();
         if ((cpu.itab[0].vec > 0) && (cpu.itab[0].pri >= cpu.priority())) {
             cpu.trapat(cpu.itab[0].vec);
             cpu.popirq();
@@ -151,9 +155,10 @@ void loop0() {
             cpu.unibus.cons.poll();
             kbdelay = 0;
         }
-        if (clkdelay++ == 7000) {       // Cal MClock 200M, build = release
+        nowtime = time_us_64();
+        if (nowtime-systime > clkdiv) {
             cpu.unibus.kw11.tick();
-            clkdelay = 0;
+            systime = nowtime;
         }
     }
 }

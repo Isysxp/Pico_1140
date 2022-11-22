@@ -17,7 +17,7 @@ void KB11::reset(uint16_t start) {
     R[7] = start;
     stacklimit = 0xff;
     switchregister = 0173030;
-    //switchregister = 01;
+    //switchregister = 0;
     unibus.reset();
     wtstate = false;
 }
@@ -436,8 +436,6 @@ void KB11::step() {
         mmu.SR[2] = PC;
     if (print)
         printstate();
-    if (instr == 076600)
-        PC = PC;
 //    if (wtstate)
 //        return;
 
@@ -841,7 +839,7 @@ void KB11::popirq() {
     }
     itab[itab.size() - 1].vec = 0;
     itab[itab.size() - 1].pri = 0;
-    wtstate = true;
+    wtstate = false;
 }
 
 void KB11::trapat(uint16_t vec) {

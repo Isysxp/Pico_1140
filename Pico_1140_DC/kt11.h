@@ -34,7 +34,7 @@ class KT11 {
                 SR[0] |= (1 << 5) | (1 << 6);
             }
             // SR2 = cpu.PC;
-            //printf("mmu::decode read from no-access page %06o\n", a);
+            printf("mmu::decode read from no-access page %06o\n", a);
             trap(0250); // intfault
         }
         const auto block = (a >> 6) & 0177;
@@ -66,7 +66,6 @@ class KT11 {
     uint16_t read16(uint32_t a);
     void write16(uint32_t a, uint16_t v);
 
-  private:
     struct page {
         uint16_t par, pdr;
 
@@ -77,6 +76,6 @@ class KT11 {
         inline bool ed() { return pdr & 8; }
     };
 
-    std::array<std::array<page, 8>, 4> pages;
+    std::array<std::array<struct page, 8>, 4> pages;
     void dumppages();
 };

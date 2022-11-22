@@ -11,7 +11,7 @@
 extern KB11 cpu;
 #define SETMASK(l, r, m) l = (((l)&~(m)) | ((r)&(m)))
 
-enum {
+enum RKERROR {
     RKOVR = (1 << 14),
     RKNXD = (1 << 7),
     RKNXC = (1 << 6),
@@ -138,6 +138,8 @@ void RK11::readwrite() {
 	    if (rkba == 0)                          // Overflow into ext addr bits
 		    SETMASK(rkcs, rkcs + 020, 060);
 		}
+        if (w)
+            f_sync(&rk05);
     sector++;
     if (sector > 013) {
         sector = 0;
@@ -182,7 +184,6 @@ void RK11::write16(const uint32_t a, const uint16_t v) {
         break;
     default:
         printf("rk11::write16 invalid write %06o: %06o\n", a, v);
-        std::abort();
     }
 }
 

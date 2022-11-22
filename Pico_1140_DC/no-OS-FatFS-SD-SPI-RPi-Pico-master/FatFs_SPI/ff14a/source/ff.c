@@ -2016,7 +2016,7 @@ static void gen_numname (
 	UINT seq			/* Sequence number */
 )
 {
-	BYTE ns[8], c;
+	uint8_t ns[8], c;
 	UINT i, j;
 	WCHAR wc;
 	DWORD sreg;

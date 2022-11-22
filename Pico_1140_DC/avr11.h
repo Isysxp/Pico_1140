@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 // interrupts
-enum {
+enum INTVEC {
     INTBUS = 0004,
     INTINVAL = 0010,
     INTDEBUG = 0014,
