@@ -37,7 +37,7 @@ class KB11 {
         uint8_t pri;
     };
 
-    std::array<intr, 8> itab;
+    std::array<intr, 32> itab;
 
     KT11 mmu;
     UNIBUS unibus;
