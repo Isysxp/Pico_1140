@@ -29,3 +29,8 @@ elseif(PICO_ON_DEVICE)
     message(WARNING "not building hello_usb because TinyUSB submodule is not initialized in the SDK")
 endif()
 add_subdirectory(no-OS-FatFS-SD-SPI-RPi-Pico-master/FatFs_SPI)
+
+# Disable RESET options - get rid of the unrecognized Reset-Device in Device-Manager
+# see https://forums.raspberrypi.com/viewtopic.php?t=334691
+add_compile_definitions(PICO_STDIO_USB_ENABLE_RESET_VIA_BAUD_RATE=0)
+add_compile_definitions(PICO_STDIO_USB_ENABLE_RESET_VIA_VENDOR_INTERFACE=0)
