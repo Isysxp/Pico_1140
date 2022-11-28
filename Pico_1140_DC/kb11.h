@@ -362,9 +362,9 @@ class KB11 {
         }
     }
 
-    template <auto l> void _ADC(const uint16_t instr) {
+        template <auto l> void _ADC(const uint16_t instr) {
         const auto da = DA<l>(instr);
-        const auto uval = read<l>(da);
+        auto uval = read<l>(da);
         if (PSW & FLAGC) {
             write<l>(da, (uval + 1) & max<l>());
             PSW &= 0xFFF0;
@@ -372,13 +372,16 @@ class KB11 {
                 PSW |= FLAGN;
             }
             setZ(uval == max<l>());
+            if (l == 1)
+                uval = (uval << 8) | 0xff;
             if (uval == 0077777) {
                 PSW |= FLAGV;
             }
             if (uval == 0177777) {
                 PSW |= FLAGC;
             }
-        } else {
+        }
+        else {
             PSW &= 0xFFF0;
             if (uval & msb<l>()) {
                 PSW |= FLAGN;
@@ -386,6 +389,7 @@ class KB11 {
             setZ(uval == 0);
         }
     }
+
 
     template <auto l> void SBC(const uint16_t instr) {
         const auto da = DA<l>(instr);
