@@ -41,7 +41,7 @@ void ls(const char *dir) {
 	FILINFO fno; /* File information */
 	memset(&dj, 0, sizeof dj);
 	memset(&fno, 0, sizeof fno);
-	fr = f_findfirst(&dj, &fno, p_dir, "*");
+	fr = f_findfirst(&dj, &fno, p_dir, "*.DSK");
 	if (FR_OK != fr) {
 		printf("f_findfirst error: %s (%d)\n", FRESULT_str(fr), fr);
 		return;
