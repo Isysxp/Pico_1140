@@ -35,7 +35,7 @@ uint16_t RK11::read16(const uint32_t a) {
     case 0777412:
         return rkda;
     default:
-        printf("rk11::read16 invalid read %06o\n", a);
+        // printf("rk11::read16 invalid read %06o\n", a);
         trap(INTBUS);
     }
 }
@@ -106,6 +106,8 @@ void RK11::readwrite() {
     }
 
     bool w = ((rkcs >> 1) & 7) == 1;
+    int i;
+    int zero=0;
     int32_t pos = (cylinder * 24 + surface * 12 + sector) * 512;
     //if (w)
     //    printf("Write:");
@@ -120,7 +122,7 @@ void RK11::readwrite() {
                rkcs, rkba, rkwc, cylinder, surface, sector, w, rker);
     }
 
-    for (auto i = 0; i < 256 && rkwc != 0; i++) {
+    for (i = 0; i < 256 && rkwc != 0; i++) {
 	    rkba18 = rkba | (rkcs & 060) << 12;     // Include ext addr bits
         if (w) {
             uint16_t val = cpu.unibus.read16(rkba18);
@@ -138,8 +140,14 @@ void RK11::readwrite() {
 	    if (rkba == 0)                          // Overflow into ext addr bits
 		    SETMASK(rkcs, rkcs + 020, 060);
 		}
-        if (w)
-            f_sync(&rk05);
+
+    if (w && i<256) {                           // Fill remainder of sector with zero
+        for (i=i;i<256;i++)
+          f_write(&rk05,&zero,2,&bcnt);
+    }
+
+    if (w)
+        f_sync(&rk05);
     sector++;
     if (sector > 013) {
         sector = 0;

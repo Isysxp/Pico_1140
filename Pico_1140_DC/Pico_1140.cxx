@@ -1,3 +1,5 @@
+
+#define CFG_TUD_VENDOR 1
 #include <stdio.h>
 //
 #include "f_util.h"
