@@ -45,3 +45,43 @@ In addition, the app contains a binary loader which can be called from setup(...
 You can load a binary tape from the SDCard if the name of the tape image starts with 'maindec'. The default start address in 0200;
 
 Unix: It is sooooo easy to trash these old unix volumes! It is a good habit to 'sync' a lot of times just in case something does go wrong!
+
+Update: 20/12/2022
+
+I have now added an RL01/2 driver to the system. By default, the app will attach rt11V.dsk to unit 0. Please make sure this file is on
+the SD Card (copy is in images). The logic in this driver is slightly different to the RK11 driver in that I/O is defered for 10 CPU cycles.
+This is due to some curious behavior of RT11 in that without this option, the 'R' command does not work correctly whereas 'RUN' does.
+After the system has booted into RT11 V4..
+.BOOT DL0:
+This will bring up RT11 V5 from the RL02 image.
+
+On this image there is a copy of the DECUS c compiler. This only compiles really odltime c. Documentation in images directory.
+As a test of this system, you can have a really good laugh and run PDP8.sav...
+<BR>
+.r pdp8<BR>
+Argv: (just press return)<BR>
+PDP8 Emulator<BR>
+->B  (need ucase)<BR>
+->R 200 (need ucase)<BR>
+
+. (now you are running the 4K PDP-8 DMS system.)<BR>
+.FCL
+CONGRATULATIONS!!
+YOU HAVE SUCCESSFULLY LOADED 'FOCAL,1969' ON A PDP-8 COMPUTER.
+
+
+SHALL I RETAIN LOG, EXP, ATN ?:YES
+
+PROCEED.
+
+*
+
+So, now you have an emulated PDP-8 runnning on an emulated PDP-11 .... Rabbit hole or what!!!!
+See PDP8.COM for the command lines to build this app and PDP8.C for the source code.
+
+Have fun, Ian Schofield Dec 2022.
+
+
+
+
+
