@@ -57,14 +57,14 @@ This will bring up RT11 V5 from the RL02 image.
 
 On this image there is a copy of the DECUS c compiler. This only compiles really odltime c. Documentation in images directory.
 As a test of this system, you can have a really good laugh and run PDP8.sav...
+<BR>
+.r pdp8<BR>
+Argv: (just press return)<BR>
+PDP8 Emulator<BR>
+->B  (need ucase)<BR>
+->R 200 (need ucase)<BR>
 
-.r pdp8
-Argv: (just press return)
-PDP8 Emulator
-->B  (need ucase)
-->R 200 (need ucase)
-
-. (now you are running the 4K PDP-8 DMS system.)
+. (now you are running the 4K PDP-8 DMS system.)<BR>
 .FCL
 CONGRATULATIONS!!
 YOU HAVE SUCCESSFULLY LOADED 'FOCAL,1969' ON A PDP-8 COMPUTER.
