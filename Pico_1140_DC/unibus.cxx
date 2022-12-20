@@ -10,7 +10,7 @@ extern KB11 cpu;
 
 void UNIBUS::write16(const uint32_t a, const uint16_t v) {
     if  (a & 1) {
-        printf("unibus: write16 to odd address %06o\n", a);
+        //printf("unibus: write16 to odd address %06o\n", a);
         trap(INTBUS);
     }
     if (a < MEMSIZE) {
@@ -20,6 +20,9 @@ void UNIBUS::write16(const uint32_t a, const uint16_t v) {
     switch (a & ~077) {
     case 0777400:
         rk11.write16(a, v);
+        return;
+    case 0774400:
+        rl11.write16(a, v);
         return;
     case 0777500:
         switch (a) {
@@ -56,7 +59,7 @@ void UNIBUS::write16(const uint32_t a, const uint16_t v) {
 
 uint16_t UNIBUS::read16(const uint32_t a) {
     if (a & 1) {
-        printf("unibus: read16 from odd address %06o\n", a);
+        //printf("unibus: read16 from odd address %06o\n", a);
         trap(INTBUS);
     }
     if (a < MEMSIZE) {
@@ -65,6 +68,8 @@ uint16_t UNIBUS::read16(const uint32_t a) {
     switch (a & ~077) {
     case 0777400:
         return rk11.read16(a);
+    case 0774400:
+	    return rl11.read16(a);
     case 0777500:
         switch (a) {
         case 0777514:

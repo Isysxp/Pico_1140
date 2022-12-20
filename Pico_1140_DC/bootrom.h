@@ -1,3 +1,5 @@
+#include "stdint.h"
+
 uint16_t bootrom[] = {
     0042113,          /* "KD" */
     0012706, 02000,   /* MOV #boot_start, SP */

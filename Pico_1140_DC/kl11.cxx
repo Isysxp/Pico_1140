@@ -105,7 +105,10 @@ void KL11::write16(uint32_t a, uint16_t v)
 	switch (a)
 	{
 	case 0777560:
-		rcsr |= v & (0x40);
+		if (v & 0x40)
+			rcsr |= v & (0x40);
+		else
+			rcsr &= ~(0x40);
 		break;
 	case 0777562:
 		rcsr &= ~0x80;

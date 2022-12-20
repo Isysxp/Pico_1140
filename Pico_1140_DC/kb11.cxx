@@ -14,6 +14,7 @@ void KB11::reset(uint16_t start) {
     for (auto i = 0; i < 29; i++) {
         unibus.write16(02000 + (i * 2), bootrom[i]);
     }
+    //unibus.rl11.loadboot();           // Uncomment to directly boot RL02
     R[7] = start;
     stacklimit = 0xff;
     switchregister = 0173030;
@@ -824,7 +825,7 @@ void KB11::interrupt(uint8_t vec, uint8_t pri) {
           printf("%o %d:%d\r\n",itab[i].vec,i,itab.size());
         std::abort();
     }
-    for (uint8_t j = i + 1; j < itab.size(); j++) {
+    for (uint8_t j = itab.size()-1; j > i; j--) {
         itab[j] = itab[j - 1];
     }
     itab[i].vec = vec;

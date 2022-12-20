@@ -11,7 +11,7 @@ set(CMAKE_C_COMPILER_FORCED)
 set(CMAKE_CXX_COMPILER_FORCED)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 if (TARGET tinyusb_device)
-    add_executable(Pico_1140 avr11.cxx disasm.cxx getline.cxx kb11.cxx kl11.cxx kt11.cxx kw11.cxx lp11.cxx pc11.cxx Pico_1140.cxx rk11.cxx unibus.cxx hw_config.c)
+    add_executable(Pico_1140 avr11.cxx disasm.cxx getline.cxx kb11.cxx kl11.cxx kt11.cxx kw11.cxx lp11.cxx pc11.cxx Pico_1140.cxx rk11.cxx rl11.cxx unibus.cxx hw_config.c)
 
     # pull in common dependencies
     target_link_libraries(Pico_1140 pico_stdlib FatFs_SPI)

@@ -115,7 +115,12 @@ void setup(char *disk) {
     }
 	if (cpu.unibus.rk11.rk05.obj.lockid)
 		return;
-	FRESULT fr = f_open(&cpu.unibus.rk11.rk05, disk, FA_READ | FA_WRITE);
+	FRESULT fr = f_open(&cpu.unibus.rl11.rl02, "rt11v.dsk", FA_READ | FA_WRITE);
+	if (FR_OK != fr && FR_EXIST != fr) {
+		printf("f_open(%s) error: %s (%d)\n", disk, FRESULT_str(fr), fr);
+		while (1) ;
+	}
+    fr = f_open(&cpu.unibus.rk11.rk05, disk, FA_READ | FA_WRITE);
 	if (FR_OK != fr && FR_EXIST != fr) {
 		printf("f_open(%s) error: %s (%d)\n", disk, FRESULT_str(fr), fr);
 		while (1) ;
@@ -151,6 +156,7 @@ void loop0() {
             return; // exit from loop to reset trapbuf
         }
         cpu.unibus.rk11.step();
+        cpu.unibus.rl11.step();
         if (kbdelay++ == 500) {
             cpu.unibus.cons.poll();
             kbdelay = 0;
