@@ -1,0 +1,3039 @@
+
+
+
+
+        #
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            DECUS C LANGUAGE SYSTEM
+
+
+                           RSX-11M V4.0 Executive and
+                          F11ACP C Extensions Library
+
+
+                                       by
+
+                                Robert B. Denny
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                         DECUS Structured Languages SIG
+
+                                  Release V2.0
+                                   #18-Oct-82
+        #
+
+
+
+
+
+
+        .note Copyright (C) 1980,1982 DECUS
+                       General   permission  to  copy  or
+                       modify, but  not  for  profit,  is
+                       hereby  granted, provided that the
+                       above copyright notice is included
+                       and reference  made  to  the  fact
+                       that  reproduction privileges were
+                       granted by DECUS.
+
+                       The information in  this  document
+                       is   subject   to  change  without
+                       notice and should not be construed
+                       as   a   commitment   by   Digital
+                       Equipment Corporation or by DECUS.
+
+                       Neither      Digital     Equipment
+                       Corporation,   DECUS,   nor    the
+                       authors  assume any responsibility
+                       for the use or reliability of this
+                       document    or    the    described
+                       software.
+
+                       This  software  is  made available
+                       without any support whatsoever. If
+                       you   are   responsible   for   an
+                       implementation of this system, you
+                       should    expect    to   have   to
+                       understand and modify  the  source
+                       code if you encounter any problems
+                       in implementing or maintaining the
+                       compiler  or its run-time library.
+                       The DECUS Structured Languages SIG
+                       is   the   primary    focus    for
+                       communication  among users of this
+                       software.
+
+
+
+
+
+
+
+
+
+
+                       UNIX is   a   trademark   of    Bell    Telephone
+        Laboratories.   RSX,  RSTS/E,  RT11  and  VMS  are trademarks of
+        Digital Equipment Corporation.
+
+        
+ This document describes the RSX-11M V4.0 Executive  Extensions  Library
+        for  the  DECUS C programming system. It assumes that the reader
+        is familiar with the C language and with the  RSX-11M  executive
+        services.  This  manual  should  be used in conjunction with the
+        RSX-11M V4.0 Executive Reference Manual AA-L675A-TC.
+ For the most part, the routines in this library  provide  a  convenient
+
+
+
+
+
+
+        run-time  interface  to the RSX-11M Executive's services from C.
+        In keeping with the efforts  to  baseline  and  standardize  the
+        common  C  runtime  library  functions,  the  RSX-11M extensions
+        library is distributed separately.
+ All but 3 of the RSX-11M V4.0 executive services are available  through
+        the extensions library. This includes:
+
+        	* Indirect command file support
+        	* Obtaining system and task information
+        	* Timer services
+        	* Full AST support in C
+        	* Communication between tasks
+        	* Program Logical Address Space (PLAS) services
+        	* Suspend and resume execution of tasks
+        	* Parent-offspring tasking
+        * Alternate CLI support
+        	* Direct queueing of I/O requests (QIO's)
+        	* Exit services
+
+        The  Connect  To  Interrupt  Vector and the 2 Specify SST Vector
+        Table services are not implemented.
+ With this comprehensive set  of  C-callable  functions,  including  AST
+        service,   it   should   be  possible  to  avoid  most  MACRO-11
+        programming in system applications.
+        
+        In  addition,  a  number  of  ".H"  files  containing  structure
+        definitions,  offset  definitions  and  I/O  function and return
+        value  definitions  have  been  provided  to  facilitate  system
+        programming.  These files are a collection of things that I have
+        made   as  needed  and  are  by  no  means  a  complete  set  of
+        definitions.
+        
+        Finally, three new routines have been added which make  it  very
+        convenient  to  access  files  via direct communication with the
+        Files-11 ACP, given only a filespec string, an FNB somewhere and
+        a free LUN.
+        
+        Most of the routines in this  library  will  function  correctly
+        with  RSX-11M  V3.2.   Those  directives  that are not supported
+        under V3.2 will not be included in the library when  built  with
+        CXMAK.CMD if you specify V3.2.
+        
+        .note WARNING
+                       Some   of  the  routines  in  this
+                       library have  never  been  tested.
+                       Be  particularly suspicious of the
+                       new additions for RSX-11M V4.0.
+                       
+        
+ In general, the function calls take a form  similar  to  that  for  the
+        corresponding  system  macro  call.  In  a  few  cases, optional
+        parameters are not accessible from C.
+        
+ All (but 1) of the C-callable functions are implemented with '$S'  form
+        system  macro  call.  In addition, care has been taken to ensure
+        that all (but 1) of the functions  are  re-entrant.  This  means
+
+
+
+
+
+
+        that  the  extensions  library  may  be  implemented as a shared
+        library, with one copy of the code in  memory  being  shared  by
+        multiple  programs.  The  exception  to  this  is  the  ^&gmcr\&
+        function. DEC provided no way to make this  re-entrant,  as  the
+        command line buffer is in the DPB.
+        
+        .hl 1 ^&Access to External Labels and $DSW\&
+ DECUS C  allows  identifiers to contain the "$" character. In addition,
+        the "__" character eventually becomes "." in the object file. If
+        an identifier is declared external, it is  made  global  in  the
+        object file. This makes it possible to access externally labeled
+        locations.
+ The file  CX.H  contains  an "extern int $dsw;" declaration. This makes
+        the RSX-11M Directive Status Word ($DSW) accessible from C. This
+        file must be _#include'ed at the beginning of any program  using
+        the Extensions Library.
+        
+        .note
+                       Be   careful  about  using  global
+                       "equates" (such as IS.SUC)  in  C.
+                       These  are NOT address labels. For
+                       example, if  you  declare  "extern
+                       int   is__suc",  where  IS.SUC  is
+                       externally equated to "1" and then
+                       use is__suc in an expression,  you
+                       will   get   the   ^&contents   of
+                       location 1\& (and probably an  odd
+                       address  trap!).  It  is  possible
+                       (but very  tacky)  to  get  around
+                       this  by  prefixing the use of the
+                       equated symbol  in  an  expression
+                       with  the  "_&" operator, since it
+                       means "take  this  literally,  not
+                       what  it  points  to". Please read
+                       the next section.
+                       
+        .hl 1 ^&System Defined Symbols and Structures\&
+ When an executive service is requested  in  MACRO-11,  the  request  is
+        formed  by  expanding  a pre-defined macro. In many cases, there
+        are also pre-defined symbolic  codes,  symbolic  data  structure
+        offsets,  etc.  Since  these  values are not address labels, but
+        literal values, there is no semantically  clean  way  to  access
+        them globally in C.
+        
+ The preferred  technique for using system defined global literals is to
+        _#define them in a header file or the  program  itself.  Several
+        header  files  are  supplied with the Extensions Library for use
+        with the functions requiring global literals. The  literals  are
+        defined  per  their MACRO-11 definitions (except "." in MACRO is
+        "__" in C).
+        
+ There is one required header file, CX.H, which contains _#define's  for
+        all  of  the  DSW  return  codes  and the typdef definitions for
+        "word", "byte" and  "rad50".  This  file  must  be  _#include'ed
+        before  any  of the other extensions library header files, since
+        those definitions are used in the other files. See  the  example
+
+
+
+
+
+
+        program in appendix A.
+        
+        Notice  that  most 16 bit quantities are defined as "word" which
+        is typdef'ed as  "unsigned".   This  reflects  their  nature  as
+        unsigned  quantities.  One  of the most common pitfalls in doing
+        system work from C is unintended sign extension when  converting
+        8-bit to 16-bit format or from 16-bit to 32-bit form.  Note that
+        there is no unsigned 32 bit type in C.
+        
+ All of  the  Extensions  Library  header  file  _#define's were made by
+        extracting the appropriate  system  macro  from  RSXMAC.SML  and
+        munging  it  with  FASTEXT  or  TECO  into the required _#define
+        syntax and numeric radix. Hopefully, this means that the  values
+        are correct.
+        
+        .note
+                       By  convention,  the symbols which
+                       are _#define'ed are capitalized.
+                       
+        .hl 1 ^&Optional Parameters\&
+ Many of  the  system  macros  have  optional   parameters.   When   the
+        corresponding  function is called from C, all parameters must be
+        present. However, a parameter value of  zero  is  equivalent  to
+        omitting the parameter in the macro call. For example:
+
+   cmkt(0,t2srv);	/* Cancel mark time served by t2srv() */
+   cmkt(7,0);		/* Cancel mark time using flag 7 */
+   cmkt(7,t2srv);	/* Combination of above 2 */
+   cmkt(0,0);		/* Cancel ALL mark time requests */
+        
+        .hl 1 ^&Function return value\&
+ Most extensions  library  functions  return  the  value  of the RSX-11M
+        directive status word ($DSW). A few abort the task if they fail.
+        The DSW may be referred to as "$dsw" within the C  program  also
+        if  "extern  int  $dsw;"  is  stated,  or  if  the  file CX.H is
+        _#include'ed. The RSX-11M V4.0 Executive Reference Manual,  sec.
+        1.2,  explains  the  role  of  the DSW. The C header file, CX.H,
+        contains _#define's for all of the codes that may be returned in
+        the DSW. The meanings of these codes are given in the  Executive
+        Reference   Manual,  appendix  B.  In  addition,  the  directive
+        descriptions give the codes associated with that  directive.  To
+        include  the  definitions  in  your program, use the following C
+        compiler directive:
+
+        	_#include <cx.h>
+        
+        .hl 1 ^&Virtual Addresses in C\&
+ When interacting with the RSX-11M executive at the  level  provided  by
+        the  extensions library, it is inevitable that virtual addresses
+        will be manipulated and used as pointers. This  is  particularly
+        true  when  using  the  memory management functions. Also, the C
+        storage allocator functions  return  virtual  addresses,  not  C
+        pointers. It is important to make this distinction, owing to C's
+        powerful   address   arithmetic   capabilities.   See   ^&The  C
+        Programming Language\& by Kernighan and  Ritchie,  sections  5.4
+        and 5.6.
+
+
+
+
+
+
+        
+ It is a kludge to define a virtual address as an integer. Since virtual
+        addresses  on the PDP-11 are "pointers to bytes (or characters)"
+        it is wise to adopt the convention of defining them as character
+        pointers. To make things crystal clear, the  file  CX.H  does  a
+        "typedef  char  *address;",  making  "address"  synonymous  with
+        "character pointer". See the file WDBDF.H for  an  example.  You
+        might  also define the standard allocator functions as returning
+        a value of type address.
+        
+        .hl 1 ^&AST Service Routines\&
+        
+ The RSX-11M C Extensions Library provides full AST service  capability.
+        Any  C function may serve as an AST service routine. The address
+        of the AST service  routine  is  passed  as  a  function-pointer
+        parameter  to  the  function which supports AST's. Normally, the
+        AST routine address is an optional parameter and  a  zero  value
+        has the effect of omitting the AST.
+        
+ It is  necessary  to  understand the details of AST service startup and
+        exit. When an AST occurs, the executive ALWAYS pushes the task's
+        Event Flag mask word, its PSW, its  PC  and  its  DSW  (in  that
+        order,  DSW  on  the  top)  onto  the  task's stack. Consult the
+        RSX-11M V4.0 Executive Reference Manual, section 2.3.4, for  the
+        details of this.
+        
+ In addition to the 4 task state words just mentioned, the executive MAY
+        push additional parameters, depending on the reason for the AST.
+        These  trap-dependent  parameters  are  often  needed by the AST
+        service routine. The extensions  library  contains  a  function,
+        ^&gtdp\&,  which  allows the C user to access them. The ^&gtdp\&
+        function takes as its parameter the word offset from the top  of
+        the  stack  as it is shown in the Exec manual section 2.3.4, and
+        returns the integer value of the word at that  location  on  the
+        stack.
+        
+        .note
+                       The   normal  C  environment  save
+                       routine (csv_$)  destroys  R0.   A
+                       slightly  larger  version of these
+                       routines are provided  within  the
+                       CX    library,   in   the   module
+                       ACSV.MAC.  The  csv_$  routine  in
+                       ACSV.MAC    preserves   R0.   This
+                       version of csv_$ and  cret_$  will
+                       automatically be included in all C
+                       programs   which  utilize  the  CX
+                       library, whether they actually use
+                       ASTs or not.
+                       
+ Normally, C routines do not save R0 and R1.  This has dire consequences
+        if an AST service routine modifies  R0  or  R1,  destroying  the
+        interrupted routine's context.  As just noted, the csv_$ routine
+        in  the  CX  library  preserves R0 and R1.  In addition, the AST
+        service routine MUST call the  ^&astset\&  function  immediately
+        upon  entry.   This  function  saves  R0  and R1. An AST service
+
+
+
+
+
+
+        routine (obviously) cannot pass a function return,  since  there
+        was  no  real  "caller".  The  ^&astx\&  routine mentioned below
+        restores R0 and R1.
+        
+ Finally, but MOST IMPORTANTLY, the trap-dependent  parameters  must  be
+        removed  from  the  stack  before the executive AST service exit
+        routine is called. A C function which is used as an AST  service
+        routine  MUST  use  the  extensions library function ^&astx\& to
+        exit  the  function.  The  ^&astx\&  routine  takes  an  integer
+        parameter which is the number of words to remove from the top of
+        stack  prior to entering the executive AST service exit routine.
+        This  parameter  must  be  equal  to  the  number  of  words  of
+        trap-dependent  parameters  that the exec pushed when it started
+        the AST.  As  mentioned  in  the  previous  paragraph,  it  also
+        restores all of the registers.
+        
+        .note
+                       It  is very important that care be
+                       taken in the use  of  ^&astx\&.  A
+                       directive    error    causes    an
+                       immediate task abort. An incorrect
+                       value  for  the   stack   cut-back
+                       parameter   will   lead   to  task
+                       failure.
+                       
+        .hl 1 ^&Changes from the V3.2 Extensions Library\&
+        
+        This  library  supersedes  the  V1.1  release  of  the   RSX-11M
+        Executive C Extensions Library.  The most notable changes are in
+        the  global  definitions  of the types "address", "word", "byte"
+        and "rad50". These changes have been incorporated into the  ".H"
+        files.   In  addition, several directives new to RSX-11M Version
+        4.0 have been  added.   Also,  the  P-section  names  have  been
+        changed to those generated by the current C compiler.
+        
+        Three  new  functions, setfnb(), xparse() and dirset() have been
+        added to allow file access via  direct  communication  with  the
+        Files-11   ACP.   While  not  actually  executive  calls,  these
+        routines make it possible to do useful file-oriented  processing
+        at  the system level.  They also could serve as the basis for an
+        RSX-specific "standard I/O library"  which  is  streamlined  and
+        does  not  require  FCS  etc. (like Dave Conroy's original one).
+        Any volunteers?
+        
+        The library is still usable under  V3.2,  and  if  you  use  the
+        "CXMAK.CMD"  file  to  build the library, the routines which are
+        new to V4.0 will not be built into the library.  The reason  for
+        this  is  that  the  macros will not expand when the V3.2 system
+        macro library is used.
+        
+ Each function description consists of the function  name,  the  English
+        name,  parameter  type  definitions  in C, and the function call
+        format in C. The corresponding description in Chapter 5  of  the
+        RSX-11M  V4.0  Executive  Reference  Manual  should be used as a
+        primary reference. If system symbols are involved, there will be
+        a header file for use with  the  C  function,  and  it  will  be
+
+
+
+
+
+
+        specified in the function description.
+ The following  is  a  list  of the RSX-11M executive services and their
+        function calls provided by  the  extensions  library.  Functions
+        marked with "(V4)" are available only with RSX-11M V4.0:
+
+        	Abort Task				abrt
+        	Alter task priority			altp
+        	Assign LUN				alun
+        	AST routine setup			astset**
+        	AST service exit			astx
+        	Attach region				atrg
+        	Clear event flag			clef
+        	Cancel mark time requests		cmkt
+        	Connect					cnct
+        	Create address window			craw
+        	Create group global event flags		crgf
+        	Create region				crrg
+        	Cancel scheduled requests		csrq
+        	Declare significant event		decl
+        	Disable AST recognition			dsar
+        	Disable checkpointing			dscp
+        	Detach region				dtrg
+        	Eliminate address window		elaw
+        	Eliminate group global event flags	elgf
+        Emit status                             emst (V4)
+        	Enable AST recognition			enar
+        	Enable checkpointing			encp
+        	Exit iff event flag not set		exif
+        	Exit					exitt <--
+        	Exit with status			exst
+        	Extend task				extk
+        Get Command for CLI                     gcci (V4)
+        	Get CLI information			gcii (V4)
+        	Get LUN information			glun
+        	Get MCR command line			gmcr
+        	Get mapping context			gmcx
+        	Get partition parameters		gprt
+        	Get region parameters			greg
+        	Get trap-dependent parameters**		gtdp**
+
+----------------
+
+          ** Not an RSX-11M executive service ! Get time parameters gtim
+          Get task parameters gtsk Map address window map Mark time mrkt
+          Queue  I/O request qio Queue I/O request and wait qiow Receive
+          data or stop rcst Receive data rcvd Receive data or exit  rcvx
+          Read all event flags rdaf Read extended event flags rdxf
+        Request and  Pass  Offspring Information  rpoi (V4) Request task
+          rqst Receive by reference rref Resume task rsum Run task run
+        Specify Command Arrival AST             scaa (V4)
+        Set Command Line Interpreter            scli (V4)
+        Set up  FNB                             setfnb** Send data sdat
+        Send, Request and Connect               sdrc (V4)
+        Send Data, Request and Pass OCB         sdrp (V4) Set event flag
+          setf Specify FPP exception AST sfpa
+        Send Message                            smsg (V4)  Suspend  task
+
+
+
+
+
+
+          spnd Spawn task spwn Specify receive data AST srda
+        Specify Requested   Exit  AST               srex  (V4)  Send  by
+          reference sref Specify receive by reference AST srra
+        Set System  Time                          stim  (V4)  Stop   for
+          logical  OR of eflags 1-16 stlo0 Stop for logical OR of eflags
+          17-32 stlo1 Stop for logical OR of eflags 33-48 stlo2 Stop for
+          logical OR of eflags 49-64 stlo3 Stop for logical OR of eflags
+          65-80 stlo4 Stop for logical OR of  eflags  81-96  stlo5  Stop
+          task stop Stop for single event flag stse
+        Unlock Group  Global Event Flags         ulgf (V4) Unmap address
+          window umap Unstop task ustp Wait for significant  event  wsig
+          Wait  for  logical OR of eflags 1-16 wtlo0 Wait for logical OR
+          of eflags 17-32 wtlo1 Wait for  logical  OR  of  eflags  33-48
+          wtlo2  Wait  for  logical  OR  of  eflags 49-64 wtlo3 Wait for
+          logical OR of eflags 65-80 wtlo4 Wait for logical OR of eflags
+          81-96 wtlo5 Wait for single event flag wtse
+          
+        
+        .hl 1 ^&Abort Task\&
+
+
+                                    ********
+                                    * ABRT *
+                                    ********
+
+
+
+        File name:	abrt.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word status;		/* Returned $DSW */
+
+                status = abrt(tsknam);
+
+        [end]
+        
+        .hl 1 ^&C register save and restore with AST support\&
+
+
+                                   *********
+                                   * ACSV$ *
+                                   *********
+
+
+
+        File name:	acsv.mac
+
+
+        Usage
+
+                jsr	r5,csv$
+                _...
+
+
+
+
+
+
+                jmp	cret$
+
+        Description
+
+     C program Run-time Environment with RSX AST's
+
+                Each C subroutine starts with a call to CSV$  and  exits
+                by  jumping  to CRET$.  Upon exit, the stack need not be
+                equal to its value on entrance. This  version  preserves
+                R0, so that AST's will work.
+
+                During  the  execution of all C subroutines, register R5
+                points  to  the   current   "environment."    Within   a
+                subroutine, it appears as follows:
+
+                	 ______________________________
+                	|		|
+  SP ->	| 1st loc. var. | -10(R5)	C$AUTO-2(R5)
+                	|______________________________|
+                	|		|
+                	| Saved R2	|  -6(R5)
+                	|______________________________|
+                	|		|
+                	| Saved R3	|  -4(R5)
+                	|______________________________|
+                	|		|
+                	| Saved R4	|  -2(R5)
+                	|______________________________|
+                	|		|
+  R5 ->	| Saved R5	|
+                	|______________________________|
+                	|		|
+                	| Return add.	|  +2(R5)
+                	|______________________________|
+                	|		|
+                	| First arg.	|  +4(R5)	C$PMTR+0(R5)
+                	|______________________________|
+                	|		|
+                	| Second arg.	|  +6(R5)	C$PMTR+2(R5)
+                	|______________________________|
+
+                Within  a subroutine, Registers R0-R4 and the top of the
+                stack, (sp) are available for use. Registers R0  and  R1
+                are not preserved by subroutines and may be used to pass
+                a return value.
+
+                R5  must  not be modified by a subroutine.  All variable
+                addressing must be done by offsets  to  R5.   Subroutine
+                arguments  must  be  accessed  by  reference  to C$PMTR.
+                Subroutine local variables must be accessed by reference
+                to  C$AUTO.   This  permits  modification   of   calling
+                sequences without rewriting all subroutines.
+
+                CSV$ refers to global symbol $$main to call the run-time
+                startup program from the (RSX) library.
+
+
+
+
+
+
+
+                An  RSX  AST routine must call astset() immediately upon
+                entry to save R0 and R1. These registers are restored by
+                astx(), which must be used to exit from an  AST  service
+                routine.  See  the  documentation  of  the  CX  library,
+                CX.DOC.
+
+        [end]
+        
+        .hl 1 ^&Alter Priority\&
+
+
+                                    ********
+                                    * ALTP *
+                                    ********
+
+
+
+        File name:	altp.mac
+
+
+        Usage
+                _#include <cx.h>
+                word nprio;		/* New priority 1-250 decimal */
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word status;		/* Returned DSW */
+
+                status = altp(tsknam, nprio)	/* Returns DSW */
+
+        [end]
+        
+        .hl 1 ^&Assign LUN\&
+
+
+                                    ********
+                                    * ALUN *
+                                    ********
+
+
+
+        File name:	alun.mac
+
+
+        Usage
+                _#include <cx.h>
+                word lun;	/* Logical Unit Number */
+                word dnam;	/* Dev. name: 2 ASCII char's */
+                		/* packed into an "int" */
+                word unit;	/* Device unit number */
+                word status;	/* Returned DSW */
+
+                status = alun(lun, dnam, unit);
+
+        Description
+
+                This  version  of  alun  is   retained   for   backwards
+                compatibility  with  previous  versions  of  CX.   It is
+
+
+
+
+
+
+                recommended that the alunx() function  be  used  in  new
+                programs  due  to the ease with which the device name is
+                passed.
+
+        Notes
+
+                A union may be used to pack the device name into an int:
+
+                	union	{
+                		int dnam;
+                		char dev[2];
+                		} device;
+                	etc...
+
+        [end]
+        
+        .hl 1 ^&Assign LUN (Extended)\&
+
+
+                                   *********
+                                   * ALUNX *
+                                   *********
+
+
+
+        File name:	alunx.mac
+
+
+        Usage
+                _#include <cx.h>
+                word lun;	/* Logical Unit Number */
+                char *dnam;	/* Device name string */
+                word unit;	/* Device unit number */
+                word status;	/* Returned DSW */
+
+                status = alunx(lun, dnam, unit);
+
+        Description
+
+                This version of the assign LUN directive has been  added
+                to  make  it  easier to use from C.  The alun() function
+                requires that the 2-character device name be packed into
+                a word and passed by value.  That was  in  keeping  with
+                the  general  philosophy  of keeping the mapping between
+                the C call and the MACRO usage  as  close  as  possible.
+                However, packing the device name requires a hack such as
+                the use of a union, and useless run-time code to fill in
+                the union since DECUS C cannot initialize a union.
+
+                alunx()  takes  the device name as a string, the address
+                of which is passed as the parameter.  Only the first two
+                letters of the string are used, so the string may be  an
+                entire  file specification which begins with an explicit
+                device name, or may be the device name field of an FNB.
+
+                The most common usage, however, will be:
+
+
+
+
+
+
+                	status = alunx(lun, "XX", unit);
+
+        Notes
+
+                Only the 1st two characters of the string are used.
+
+                No null is needed at the  end  of  the  string,  so  the
+                address  passed  may be that of the device name field of
+                an FNB.
+
+                No checks are made for the validity of  the  characters,
+                whatever is given will be passed to the directive.
+
+                The string need not be word-aligned.
+        [end]
+        
+        .hl 1 ^&Set AST service environment\&
+
+
+                                   **********
+                                   * ASTSET *
+                                   **********
+
+
+
+        File name:	astset.mac
+
+
+        Usage
+
+                _#include <cx.h>
+
+                astset();
+
+        Description
+
+                This  function  must be called immediately upon entrance
+                to any function which is used as an AST service routine.
+                Since  AST  service  is  (obviously)  asynchronous,  ALL
+                registers  must  be preserved across the execution of an
+                AST service routine.  astset() handles this  requirement
+                by  saving  R0 and R1 in a transparent manner by tucking
+                them  under  the  normal  C  stack  frame.   The  astx()
+                function automatically restores the original environment
+                prior to issuing the AST service exit directive.
+
+                This  means  that  a  function  which  is used as an AST
+                service routine may NOT be used as  a  normal  function.
+                It must always exit with a call to astx()!
+
+                For more information on usage of C AST service routines,
+                see the section on AST service in the CX manual.
+
+        [end]
+        
+        .hl 1 ^&AST Service Exit\&
+
+
+
+
+
+
+                                    ********
+                                    * ASTX *
+                                    ********
+
+
+
+        File name:	astx.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word n;	/* _# words of trap-dep. param's for AST */
+
+                astx(n);	/* AST exit, cut n WORDS off stack */
+
+
+        Description
+
+                This  "function"  effects  exit  from  a  C  AST service
+                routine. It MUST be called to exit from such a  routine;
+                a   "return"  will  fail  owing  to  the  unusual  stack
+                structure which has R0 and R1 saved in a magic  location
+                and  may  have  trap-dependent parameters there as well.
+                See the documentation on C AST service routine usage  in
+                the CX manual for more info.  Also see the documentation
+                on astset().
+
+                If the particular type of AST starts with trap-dependent
+                parameters on the stack, astx MUST be directed to remove
+                them prior to doing the actual AST service exit. See the
+                RSX-11M  V4.0 Executive Reference Manual, sections 2.3.3
+                and 2.3.4. Call with a 0 if there are none.
+
+        Notes
+
+                Failure of AST exit causes task abort.
+
+        Bugs
+
+                Does  unnecessary  thrashing  if  no  TDPs  are  to   be
+                stripped.
+        
+        .hl 1 ^&Attach Region\&
+
+
+                                    ********
+                                    * ATRG *
+                                    ********
+
+
+
+        File name:	atrg.mac
+
+
+        Usage
+
+
+
+
+
+
+                _#include <cx.h>
+                _#include <rdbdf.h>	/* RDB struct definition */
+                struct rdb regblk;	/* Region Definition Block */
+                word status;		/* Returned DSW */
+
+                status = atrg(_&regblk);
+
+        [end]
+        
+        .hl 1 ^&Clear Event Flag\&
+
+
+                                    ********
+                                    * CLEF *
+                                    ********
+
+
+
+        File name:	clef.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word efn;		/* Event flag number */
+                word status;		/* Returned DSW */
+
+                status = clef(efn);
+        [end]
+        
+        .hl 1 ^&Cancel Mark Time Requests\&
+
+
+                                    ********
+                                    * CMKT *
+                                    ********
+
+
+
+        File name:	cmkt.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word efn;		/* Event flag number */
+                {typ} astsrv();		/* AST service function */
+                word status;		/* Returned DSW */
+
+                status = cmkt(efn, astsrv);
+
+        Description
+
+                Cancel mark time requests specified by efn, AST routine,
+                both,  or cancel all mark time requests. See the RSX-11M
+                V4.0 Exec Ref Manual, section 5.3.8.
+
+
+
+
+
+
+        [end]
+        
+        .hl 1 ^&Connect to Task\&
+
+
+                                    ********
+                                    * CNCT *
+                                    ********
+
+
+
+        File name:	cnct.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* Offspring task name */
+                word eflag;		/* Event flag number */
+                {typ} astsrv();		/* AST service routine */
+                word esb[8];		/* 8 word status block */
+                word status;		/* Returned DSW */
+
+                status = cnct(tsknam, eflag, astsrv, esb)
+
+        [end]
+        
+        .hl 1 ^&Create Address Window\&
+
+
+                                    ********
+                                    * CRAW *
+                                    ********
+
+
+
+        File name:	craw.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <wdbdf.h> 	/* WDB definitions */
+                struct wdb winblk;	/* Actual WDB */
+                word status;		/* Returned DSW */
+
+                status = craw(_&winblk);
+        [end]
+        
+        .hl 1 ^&Create Group Global Event Flags\&
+
+
+                                    ********
+                                    * CRGF *
+                                    ********
+
+
+
+
+
+
+
+        File name:	crgf.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word group;		/* UIC group number or 0 */
+                word status;		/* Returned DSW */
+
+                status = crgf(group);
+        [end]
+        
+        .hl 1 ^&Create Region\&
+
+
+                                    ********
+                                    * CRRG *
+                                    ********
+
+
+
+        File name:	crrg.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <rdbdf.h> 	/* RDB definitions */
+                struct rdb regblk;	/* Region definition block */
+                word status;		/* Returned DSW */
+
+                status = crrg(_&regblk);
+        [end]
+        
+        .hl 1 ^&Cancel Scheduled Requests\&
+
+
+                                    ********
+                                    * CSRQ *
+                                    ********
+
+
+
+        File name:	csrq.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word status;		/* Returned DSW */
+
+                status = csrq(tsknam);
+        [end]
+        
+        .hl 1 ^&Declare Significant Event\&
+
+
+
+
+
+
+                                    ********
+                                    * DECL *
+                                    ********
+
+
+
+        File name:	decl.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = decl();
+        [end]
+        
+        .hl 1 ^&Disable AST Recognition\&
+
+
+                                    ********
+                                    * DSAR *
+                                    ********
+
+
+
+        File name:	dsar.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = dsar();
+        [end]
+        
+        .hl 1 ^&Disable Checkpointing\&
+
+
+                                    ********
+                                    * DSCP *
+                                    ********
+
+
+
+        File name:	dscp.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = dscp();
+        [end]
+
+
+
+
+
+
+        
+        .hl 1 ^&Detach Region\&
+
+
+                                    ********
+                                    * DTRG *
+                                    ********
+
+
+
+        File name:	dtrg.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <rdbdf.h> 	/* RDB Definitions */
+                struct rdb regblk;	/* Region Definition Block */
+                word status;		/* Returned DSW */
+
+                status = dtrg(_&regblk);
+        [end]
+        
+        .hl 1 ^&Eliminate Address Window\&
+
+
+                                    ********
+                                    * ELAW *
+                                    ********
+
+
+
+        File name:	elaw.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <wdbdf.h> 	/* WDB definitions */
+                struct wdb winblk;	/* Window definition block */
+                word status;		/* Returned DSW */
+
+                status = elaw(_&winblk);
+        [end]
+        
+        .hl 1 ^&Eliminate Group Global Event Flags\&
+
+
+                                    ********
+                                    * ELGF *
+                                    ********
+
+
+
+        File name:	elgf.mac
+
+
+
+
+
+
+
+        Usage
+
+                _#include <cx.h>
+                word group;		/* Group number */
+                word status;		/* Returned DSW */
+
+                status = elgf(group);
+        [end]
+        
+        .hl 1 ^&Emit Status\&
+
+
+                                    ********
+                                    * EMST *
+                                    ********
+
+
+
+        File name:	emst.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tname[2];		/* Spec'd connected task */
+                word estat;		/* Emitted status value */
+                word dstat;		/* Returned DSW */
+
+                dstat = emst(tname, estat);
+
+        [end]
+        
+        .hl 1 ^&Enable AST recognition\&
+
+
+                                    ********
+                                    * ENAR *
+                                    ********
+
+
+
+        File name:	enar.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = enar();
+        [end]
+        
+        .hl 1 ^&Enable Checkpointing\&
+
+
+                                    ********
+
+
+
+
+
+
+                                    * ENCP *
+                                    ********
+
+
+
+        File name:	encp.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = encp();
+        [end]
+        
+        .hl 1 ^&Exit If\&
+
+
+                                    ********
+                                    * EXIF *
+                                    ********
+
+
+
+        File name:	exif.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word efn;		/* Event flag number */
+                word status;		/* Returned DSW */
+
+                status = exif(efn);
+        [end]
+        
+        .hl 1 ^&Exit Without Status\&
+
+
+                                   *********
+                                   * EXITT *
+                                   *********
+
+
+
+        File name:	exitt.mac
+
+
+        Usage
+
+                _#include <cx.h>
+
+                exitt();
+
+        Notes
+
+
+
+
+
+
+                The function name is wierd to avoid  clash  with  normal
+                exit() routine.
+
+                Failure results in task abort.
+
+        [end]
+        
+        .hl 1 ^&Exit With Status\&
+
+
+                                    ********
+                                    * EXST *
+                                    ********
+
+
+
+        File name:	exst.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word statwd;		/* Exit status code */
+
+                exst(ststwd);
+
+        Notes
+
+                Exit  status codes (EX$xxx) in CX.H. Failure causes task
+                abort.
+        [end]
+        
+        .hl 1 ^&Extend Task\&
+
+
+                                    ********
+                                    * EXTK *
+                                    ********
+
+
+
+        File name:	extk.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word delta;		/* + or	task size change */
+                word status;		/* Returned DSW */
+
+                status = extk(delta);
+        [end]
+        
+        .hl 1 ^&Get Command Line for CLI\&
+
+
+
+
+
+
+
+
+                                    ********
+                                    * GCCI *
+                                    ********
+
+
+
+        File name:	gcci.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <clidf.h>	/* CLIPB _& message codes */
+                _#include <ocbdf.h>	/* OCB definitions */
+                _#include <gccidf.h>	/* GCCI-specific structures */
+                struct cmdbuf cmd;	/* Command buffer */
+                struct cmibuf info;	/* Information buffer */
+                address caddr;		/* Spec'd cmd address in pool */
+                word ncp;		/* Action if no command */
+                word status;		/* Returned DSW */
+
+                status = gcci(_&cmd, _&info, caddr, ncp);
+
+        Notes
+
+                Only CLI tasks may issue this directive.
+
+                The file CLIDF.H contains the structure definitions  for
+                the  command  and  information  buffers,  and  the "ncp"
+                symbols.
+
+                You  should   thoroughly   familiarize   yourself   with
+                Alternate CLI operations before using this directive.
+
+                The  sizes  of  the  command and information buffers are
+                fixed  by  the   structure   definitions   in   CLIDF.H,
+                therefore,  they  are  not explicitly passed as function
+                parameters.
+
+        [end]
+        
+        .hl 1 ^&Get CLI Information\&
+
+
+                                    ********
+                                    * GCII *
+                                    ********
+
+
+
+        File name:	gcii.mac
+
+
+        Usage
+
+                _#include <cx.h>
+
+
+
+
+
+
+                _#include <gcibuf.h>
+                struct gcibuf clidat;	/* CLI info buffer */
+                rad50 clinam[2];	/* RAD50 CLI name (optional) */
+                char *tiname;		/* TI: Device name string */
+                word tiunit;		/* TI: Unit number */
+                word status;		/* Returned DSW */
+
+                status = gcii(_&clidat, clinam, tiname, tiunit);
+
+        Notes:
+                Terminal and CLI names are  optional.   Do  not  specify
+                both. See the notes in the Executive Manual.
+
+                This  directive  takes  the TI: device name as a string,
+                rather than 2 ASCII characters packed into a word.
+
+        [end]
+        
+        .hl 1 ^&Get LUN Information\&
+
+
+                                    ********
+                                    * GLUN *
+                                    ********
+
+
+
+        File name:	glun.mac
+
+
+        Usage
+                _#include <cx.h>
+                _#include <lunbuf.h> 	/* Defines struct lunbuf */
+                struct lunbuf lundat;	/* LUN info buffer */
+                word lun;		/* LUN */
+                word status;		/* Returned DSW */
+
+                status = glun(lun, _&lundat);
+        [end]
+        
+        .hl 1 ^&Get MCR Command Line\&
+
+
+                                    ********
+                                    * GMCR *
+                                    ********
+
+
+
+        File name:	gmcr.mac
+
+
+        Usage
+                	***********************
+                	***  NON RE-ENTRANT ***
+                	***********************
+
+
+
+
+
+
+                _#include <cx.h>
+                char *cmdlin;		/* Must be a pointer */
+
+                cmdlin = gmcr();
+
+
+        Description
+
+                This  function  departs  from  the  usual   CX   library
+                convention  of  keeping  the  functions re-entrant.  The
+                GMCR$  directive  itself  is  non-reentrant;   the   DPB
+                receives  the  actual command line, the address of which
+                is passed to the caller unless there was an error.
+
+        Notes
+
+                Returns address of first byte of command line or NULL if
+                failed.
+
+                $DSW contains character count  of  gotten  cmd  line  if
+                success, else
+        ##### the  DSW  error  code.  See the Exec Reference Manual sec.
+                5.3.33.
+
+        [end]
+        
+        .hl 1 ^&Get Mapping Context\&
+
+
+                                    ********
+                                    * GMCX *
+                                    ********
+
+
+
+        File name:	gmcx.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <wdbdf.h>
+                struct wdb wdbvec[n];	/* Array of WDB's */
+                word status;		/* Returned DSW */
+
+                status = gmcx(_&wdbvec)	/* Note the '_&' to pass the address */
+
+        Notes
+                You must have enough WDB's for the _# of windows.
+        [end]
+        
+        .hl 1 ^&Get Partition Parameters\&
+
+
+                                    ********
+                                    * GPRT *
+
+
+
+
+
+
+                                    ********
+
+
+
+        File name:	gprt.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <pparbf.h>
+                rad50 prtnam[];		/* RAD50 partition name */
+                struct pparbf pardat;	/* Partition param's buffer */
+                word status;		/* Returned DSW */
+
+                status = gprt(prtnam, _&pardat);
+
+        Notes
+
+                If a NULL pointer to the partition name is  passed,  the
+                parameters  returned  are  those  of  the issuing task's
+                unnamed subpartition. If the first word of the partition
+                name is zero, this function returns a  code  of  IE.PNS,
+                rather  than  letting the exec try to interpret the call
+                as a GREG$S.
+        [end]
+        
+        .hl 1 ^&Get Region Parameters\&
+
+
+                                    ********
+                                    * GREG *
+                                    ********
+
+
+
+        File name:	greg.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <rparbf.h>
+                rad50 regnam[2];	/* RAD50 region name */
+                struct rparbf regdat;	/* Region parameters buffer */
+                word status;		/* Returned DSW */
+
+                status = greg(regnam, _&regdat);
+
+        Notes
+
+                If a NULL pointer(!) to the region name is  passed,  the
+                parameters  returned are those of the task region of the
+                issuing task.
+        [end]
+        
+
+
+
+
+
+
+        .hl 1 ^&Get Trap-Dependent Parameter\&
+
+
+                                    ********
+                                    * GTDP *
+                                    ********
+
+
+
+        File name:	gtdp.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word woff;	/* WORD offset to TDP */
+                word tdp;	/* Ret. Trap-Dep. Parameter */
+
+                tdp = gtdp(woff);
+
+        Description
+
+                This routine is not an executive services  call.  It  is
+                the mechanism by which an AST service routine may access
+                the   interrupted   task's   state   or  trap  dependent
+                parameters pushed on to the stack when the AST  occured.
+                The  RSX-11M  V3.2  Executive Reference Manual, sections
+                2.3.3 and 2.3.4 contain critical information  concerning
+                AST's and their service.
+
+                The parameter supplied with the call to gtdp is the WORD
+                offset  from  the  top  of the stack AS SPECIFIED IN THE
+                EXEC MANUAL  SECTION  2.3.4  to  the  AST  parameter  of
+                interest.   There  are  7 (11 for 'M-plus) variations of
+                the task's stack at AST, as explained in  that  section.
+                For  example,  if the AST was due to the expiration of a
+                mark time, variation _#5, the gtdp function would return
+                the following:
+
+                	gtdp(0)	Event flag     [trap-dependent]
+                	gtdp(1)	Task's DSW     [task state]
+                	gtdp(2)	Task's old PC  [task state]
+                	gtdp(3)	Task's old PSW [task state]
+                	gtdp(4)	Task's EF Mask [task state]
+
+        Notes
+
+                The parameter is a WORD offset. This is for  safety,  to
+                avoid  odd  address  traps,  since  the  access  in this
+                routine is by word instructions.
+
+                No checks are made for offset legality.
+        
+        .hl 1 ^&Get Time Parameters\&
+
+
+
+
+
+
+
+
+                                    ********
+                                    * GTIM *
+                                    ********
+
+
+
+        File name:	gtim.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <timbuf.h>
+                struct timbuf timdat;	/* Time parameters buffer */
+                word status;		/* Returned DSW */
+
+                status = gtim(_&timdat);
+        [end]
+        
+        .hl 1 ^&Get Task Parameters\&
+
+
+                                    ********
+                                    * GTSK *
+                                    ********
+
+
+
+        File name:	gtsk.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <tparbf.h>
+                struct tparbf tskdat;	/* task param's structure */
+                word status;		/* Returned DSW */
+
+                status = gtsk(_&tskdat);
+        [end]
+        
+        .hl 1 ^&Map Address Window\&
+
+
+                                    *******
+                                    * MAP *
+                                    *******
+
+
+
+        File name:	map.mac
+
+
+        Usage
+
+                _#include <cx.h>
+
+
+
+
+
+
+                _#include <wdbdf.h>
+                struct wdb winblk;	/* WDB */
+                word status;		/* Returned DSW */
+
+                status = map(_&winblk);
+        [end]
+        
+        .hl 1 ^&Mark Time\&
+
+
+                                    ********
+                                    * MRKT *
+                                    ********
+
+
+
+        File name:	mrkt.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word eflag;	/* Event flag number */
+                word tmg;	/* Time interval magnitude */
+                word tnt;	/* Time interval units */
+                {typ} astsrv();	/* AST service routine */
+                word status;	/* Returned DSW */
+
+                status = mrkt(eflag, tmg, tnt);
+
+        [end]
+        
+        .hl 1 ^&Queue I/O Request\&
+
+
+                                    *******
+                                    * QIO *
+                                    *******
+
+
+
+        File name:	qio.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <qiofun.h>  /* I/O Function codes */
+                _#Include <qioret.h>  /* I/O Status return codes */
+                word func;	/* I/O function code */
+                word lun;	/* Logical unit number */
+                word eflag;	/* Event flag number */
+                word iosb[2];	/* I/O status block */
+                {typ} astsrv();	/* AST service routine */
+                int devpar[6];	/* Array of 6 parameters */
+                word status;	/* Returned DSW */
+
+
+
+
+
+
+                status = qio(func,lun,eflag,iosb,astsrv,devpar);
+
+        Notes
+
+                _#include  <qiottd.h>  for   FDX/HDX   terminal   driver
+                function, subfunction and return status codes.
+        [end]
+        
+        .hl 1 ^&Queue I/O Request and Wait\&
+
+
+                                    ********
+                                    * QIOW *
+                                    ********
+
+
+
+        File name:	qiow.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <qiofun.h>  /* I/O Function codes */
+                _#Include <qioret.h>  /* I/O Status return codes */
+                word func;	/* I/O function code */
+                word lun;	/* Logical unit number */
+                word eflag;	/* Event flag number */
+                word iosb[2];	/* I/O status block */
+                {typ} astsrv();	/* AST service routine */
+                int devpar[6];	/* Array of 6 parameters */
+                word status;	/* Returned DSW */
+
+                status = qiow(func,lun,eflag,iosb,astsrv,devpar);
+
+        Notes
+
+                _#include   <qiottd.h>   for   FDX/HDX  terminal  driver
+                function, subfunction and return status codes.
+
+                A Non-zero event flag number must  be  supplied  or  the
+                function  will  return  prior  to  completion of the I/O
+                request (i.e., the wait will fail).
+        
+        .hl 1 ^&Receive Data or Stop\&
+
+
+                                    ********
+                                    * RCST *
+                                    ********
+
+
+
+        File name:	rcst.mac
+
+
+
+
+
+
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word buffer[15];	/* Received data packet */
+                word status;		/* Returned DSW */
+
+                status = rcst(tsknam, buffer);
+
+        Notes
+
+                The first 2 words  of  the  'buffer'  will  contain  the
+                sender task name.
+
+                To  receive  data from any task, 'tsknam' must be a NULL
+                pointer.
+
+        [end]
+        
+        .hl 1 ^&Receive Data\&
+
+
+                                    ********
+                                    * RCVD *
+                                    ********
+
+
+
+        File name:	rcvd.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word buffer[15];	/* Received data packet */
+                word status;		/* Returned DSW */
+
+                status = rcvd(tsknam, buffer);
+
+        Notes
+
+                The first 2 words  of  the  'buffer'  will  contain  the
+                sender task name.
+
+                To  receive  data from any task, 'tsknam' must be a NULL
+                pointer.
+
+        [end]
+        
+        .hl 1 ^&Receive Data or Exit\&
+
+
+                                    ********
+                                    * RCVX *
+                                    ********
+
+
+
+
+
+
+        File name:	rcvx.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word buffer[15];	/* Received data packet */
+                word status;		/* Returned DSW */
+
+                status = rcvx(tsknam, buffer);
+
+        Notes
+
+                The first 2 words  of  the  'buffer'  will  contain  the
+                sender task name.
+
+                To  receive  data from any task, 'tsknam' must be a NULL
+                pointer.
+
+        [end]
+        
+        .hl 1 ^&Read All Event Flags\&
+
+
+                                    ********
+                                    * RDAF *
+                                    ********
+
+
+
+        File name:	rdaf.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word buffer[4];		/* Event flags */
+                word status;		/* Returned DSW */
+
+                status = rdaf(buffer);
+
+        [end]
+        
+        .hl 1 ^&Read Extended Event Flags\&
+
+
+                                    ********
+                                    * RDXF *
+                                    ********
+
+
+
+        File name:	rdxf.mac
+
+
+
+
+
+
+
+
+        Usage
+
+                _#include <cx.h>
+                word buffer[6];		/* 6 words of flags */
+                word status;		/* Returned DSW */
+
+                status = rdxf(buffer);
+        [end]
+        
+        .hl 1 ^&Request and Pass Offspring Information\&
+
+
+                                    ********
+                                    * RPOI *
+                                    ********
+
+
+
+        File name:	rpoi.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <ocbdf.h>	/* OCB def. (CLI tasks only) */
+                /*
+ * Codes for 'sc' parameter:
+ */
+                _#define  RP__OEX  0200	/* Force exit */
+                _#define  RP__OAL  0001	/* Pass all OCB's */
+                _#define  RP__ONX  0002	/* Pass 1st OCB */
+                rad50 tname[2];		/* Offspring task name */
+                word uic;		/* Offspring task UIC */
+                rad50 parent[2];	/* Parent task name */
+                char cmdlin[];		/* Command line buffer */
+                word cmdlgt;		/* Length of command line */
+                word sc;		/* Mode flag(s) */
+                char *tiname;		/* Name of TI: device */
+                word tiunit;		/* Unit _# of TI: device */
+                rad50 rtask[2];		/* Run task name (CLIs only) */
+                struct ocb *ocbpt;	/* Address of OCB (CLIs only) */
+                word status;		/* Returned DSW */
+
+                status = rpoi(tname,uic,parent,cmdlin,cmdlgt,
+                	      sc,tiname,tiunit,rtask,ocbpt);
+
+        Notes
+
+                Be sure to read and understand the description  of  this
+                directive in the Exec Reference manual section 5.3.53.
+
+                The  device name of the TI: device is passed as a string
+                address.  Only the 1st two characters of the string  are
+                used.
+
+                The 'rtask' and 'ocb' parameters must be zero unless the
+
+
+
+
+
+
+                issuing task is a CLI.
+
+                This  directive  requires  substantial  stack  space  to
+                construct the DPB.
+        
+        .hl 1 ^&Request Task\&
+
+
+                                    ********
+                                    * RQST *
+                                    ********
+
+
+
+        File name:	rqst.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word status;		/* Returned DSW */
+
+                status = rqst(tsknam);
+
+        Notes
+
+                Task is run under the UIC in its task header.
+        [end]
+        
+        .hl 1 ^&Receive by Reference\&
+
+
+                                    ********
+                                    * RREF *
+                                    ********
+
+
+
+        File name:	rref.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <wdbdf.h>
+                struct wdb winblk;	/* Window definition block */
+                word status;		/* Returned DSW */
+
+                status = rref(_&winblk);
+        [end]
+        
+        .hl 1 ^&Resume Task\&
+
+
+                                    ********
+
+
+
+
+
+
+                                    * RSUM *
+                                    ********
+
+
+
+        File name:	rsum.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word status;		/* Returned DSW */
+
+                status = rsum(tsknam);
+        [end]
+        
+        .hl 1 ^&Run Task\&
+
+
+                                    *******
+                                    * RUN *
+                                    *******
+
+
+
+        File name:	run.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word smg;		/* Schedule delta magnitude */
+                word snt;		/* Schedule delta units */
+                word rmg;		/* Reschedule interval mag. */
+                word rnt;		/* Reschedule interval units */
+                word status;		/* Returned DSW */
+
+                status = run(tsknam, smg, snt, rmg, rnt);
+
+        Notes
+
+                Uses  requested  task's  default  UIC.  See   the   Exec
+                reference manual sec. 5.3.57
+        [end]
+        
+        .hl 1 ^&Specify Command Arrival AST\&
+
+
+                                    ********
+                                    * SCAA *
+                                    ********
+
+
+
+
+
+
+
+
+
+        File name:	scaa.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                {typ} astsrv();		/* AST service routine */
+                word status;		/* Returned DSW */
+
+                status = scaa(astsrv);
+
+        Notes
+
+                See  the  documentation  on  C AST service. 'astsrv' = 0
+                disables the AST. This function is legal only for CLI's.
+        [end]
+        
+        .hl 1 ^&Set Command Line Interpreter\&
+
+
+                                    ********
+                                    * SCLI *
+                                    ********
+
+
+
+        File name:	scli.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 clinam[2];	/* RAD50 CLI name */
+                char *tiname;		/* TI: device name */
+                word tiunit;		/* TI: unit number */
+                word status;		/* Returned DSW */
+
+                status = scli(clinam, tiname, tiunit);
+
+        Notes
+
+                Issuing task must be privileged or a CLI.
+        [end]
+        
+        .hl 1 ^&Send Data\&
+
+
+                                    ********
+                                    * SDAT *
+                                    ********
+
+
+
+        File name:	sdat.mac
+
+
+
+
+
+
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* 2 word RAD50 task name */
+                word buffer msg[13];	/* 13 word buffer */
+                word eflag;		/* Local event flag number */
+                word status;		/* Returned DSW */
+
+                status = sdat(tsknam, msg, eflag);
+
+        [end]
+        
+        .hl 1 ^&Send, Request and Connect\&
+
+
+                                    ********
+                                    * SDRC *
+                                    ********
+
+
+
+        File name:	sdrc.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tname[2];		/* Offspring task name */
+                word msgbuf[13];	/* 13-word buffer to send */
+                word efn;		/* Event flag */
+                {typ}astsrv();		/* AST service routine */
+                word esb[8];		/* Exit status block */
+                word status;		/* Returned DSW */
+
+                status = sdrc(tname, msgbuf, efn, astsrv, esb);
+
+        Notes
+
+                Only the 1st word of the ESB is used.
+        [end]
+        
+        .hl 1 ^&Send, Request and Pass OCB\&
+
+
+                                    ********
+                                    * SDRP *
+                                    ********
+
+
+
+        File name:	sdrp.mac
+
+
+        Usage
+
+                _#include <cx.h>
+
+
+
+
+
+
+                _#include <ocbdf.h>	/* OCB Definitions */
+                /*
+ * 'flag' parameter symbolics
+ */
+                _#define  SD__REX  128	/* Force exit */
+                _#define  SD__RAL    1	/* Pass all OCB's */
+                _#define  SD__RNX    2	/* Pass 1st OCB */
+                rad50 tname[2];		/* Offspring task name */
+                word msgbuf[13];	/* 13-word buffer */
+                word efn;		/* Event flag */
+                word flag;		/* Exec. flags (see above) */
+                rad50 parent[2];	/* Parent task name */
+                struct ocb *ocbpt;	/* Address of OCB (CLIs only) */
+                word status;		/* Returned DSW */
+
+                status = sdrp(tname,msgbuf,efn,flag,parent,ocbpt);
+
+        [end]
+        
+        .hl 1 ^&Set Event Flag\&
+
+
+                                    ********
+                                    * SETF *
+                                    ********
+
+
+
+        File name:	setf.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word eflag;		/* Event flag number */
+                word status;		/* Returned DSW */
+
+                status = setf(eflag);
+        [end]
+        
+        .hl 1 ^&Fill in File Name Block\&
+
+
+                                   **********
+                                   * SETFNB *
+                                   **********
+
+
+
+        File name:	setfnb.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <fnb.h> 	/* Filename Block def. */
+
+
+
+
+
+
+                struct fnb xfnb;	/* Filename block */
+                char *fsp;		/* File spec string */
+                int lun;		/* LUN to use for lookups */
+                char *dext;		/* Default extension */
+                int status;		/* Status returned */
+
+                status = setfnb(_&xfnb, fsp, lun, dext);
+
+
+        Description
+
+                This function is not strictly a mapping  of  an  RSX-11M
+                executive  directive into a C call.  It is provided with
+                the CX library to  allow  block-oriented  file  I/O  and
+                control  operations  with  the Files-11 ACP, rather than
+                using the FCS or RMS I/O library functions.
+
+                setfnb() performs the messy part of getting a file  open
+                on  a  specified  LUN by performing all filespec parsing
+                and directory lookup operations required to  fill  in  a
+                Filename  Block (FNB).  All that is needed as inputs are
+                a filespec string and a free LUN.
+
+                Default directory and device  processing  are  performed
+                transparently,  i.e.,  the  filespec  need not be "fully
+                qualified".
+
+                If the file already exists, all that remains to be  done
+                to get the file open is to issue one of the Files-11 ACP
+                "file  access"  QIO's.  You may then read and write blox
+                with the IO.RVB and IO.WVB functions.
+
+                If the file does not exist, setfnb()  will  return  with
+                IE.NSF  (No such file).  In this case, you must manually
+                issue the  Files-11  "create  file"  (IO.CRE)  function,
+                followed  by  a  directory enter (IO.ENA) function, thus
+                creating the file. All of the fields in the  FNB  except
+                N.FID  are  valid upon return from setfnb() if the error
+                is IE.NSF.
+
+
+        Notes
+
+                Returns Directive or I/O status. If hi byte < 0,  status
+                is directive status, else is I/O status.
+
+                Errors  from  filespec  parsing  or directory operations
+                return IE.BAD (for lack of anything better).
+
+                If setfnb() returns with a status  of  IE.NSF  (no  such
+                file)  all fields except N.FID are silll usable, and the
+                FNB is all set for use in creating a new file.
+        [end]
+        
+        .hl 1 ^&Specify FPP Exception AST\&
+
+
+
+
+
+
+
+                                    ********
+                                    * SFPA *
+                                    ********
+
+
+
+        File name:	sfpa.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                {typ} astsrv();		/* AST service routine */
+                word status;		/* Returned DSW */
+
+                status = sfpa(astsrv);
+        [end]
+        
+        .hl 1 ^&Send Message to ERRLOG\&
+
+
+                                    ********
+                                    * SMSG *
+                                    ********
+
+
+
+        File name:	smsg.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <exedf.h>	/* To get ERRLOG symbols */
+                char *dspkt;		/* Data Subpacket Buffer */
+                word dsplen;		/* Length of packet, bytes */
+                word erlprm[4];		/* ERRLOG packet parameters */
+                word status;		/* Returned DSW */
+
+                status = smsg(dspkt, dsplen, erlprm);
+
+
+        Description
+
+                This directive is quite poorly documented in the RSX-11M
+                V4.0 Executive Reference Manual.  What it actually  does
+                is  to  generate  an  ERRLOG  packet and queue it to the
+                error logger task.  If a  data  subpacket  is  specified
+                ('dspkt'  is  non-null),  it  is included in the packet.
+                You must have formatted the data subpacket in some  form
+                that can be recognized by the RPT report generator task,
+                however.
+
+                Study  the error logger packet format in the appendix of
+                the  Guide  to  Writing  I/O  drivers   manual,   EPKDF$
+                definition.  Also read the code in the Executive listing
+
+
+
+
+
+
+                for  the  ERROR   module.   It   is   possible,   though
+                non-trivial,  to add another packet type code to the RPT
+                report generator  and  use  SMSG  to  put  custom  error
+                logging  messages  into your error log.  See the code in
+                DISPATCH.CNF.
+
+
+        Notes:
+
+                Contrary to the documentation in the  Exec  manual,  the
+                issuing task need be privileged only if it is issuing an
+                SMSG directive which zeroes the I/O and error counts for
+                a specified device.
+        
+        .hl 1 ^&Suspend Current Task\&
+
+
+                                    ********
+                                    * SPND *
+                                    ********
+
+
+
+        File name:	spnd.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = spnd();
+        [end]
+        
+        .hl 1 ^&Specify Power Recovery AST\&
+
+
+                                    ********
+                                    * SPRA *
+                                    ********
+
+
+
+        File name:	spra.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                {typ} astsrv();		/* AST service function */
+                word status;		/* Returned DSW */
+
+                status = spra(astsrv);
+        [end]
+        
+        .hl 1 ^&Spawn Task\&
+
+
+
+
+
+
+                                    ********
+                                    * SPWN *
+                                    ********
+
+
+
+        File name:	spwn.mac
+
+
+        Usage
+
+
+                _#include <cx.h>
+                rad50 tsknam[2]; 	/* 2 word RAD50 task name */
+                word uic;		/* UIC of offspring task */
+                word eflag;		/* Event flag number */
+                {typ} astsrv();		/* AST service routine */
+                word esb[8];		/* 8 word status block */
+                char *cmdlin;		/* --> command line */
+                word cmdlgt;		/* Length (bytes) of cmd line */
+                word status;		/* Returned DSW */
+
+                status = spwn(tsknam,uic,eflag,astsrv,esb,
+                	      cmdlin,cmdlgt);
+
+
+        Notes
+
+                Does not support specified TI:.
+        [end]
+        
+        .hl 1 ^&Specify Receive Data AST\&
+
+
+                                    ********
+                                    * SRDA *
+                                    ********
+
+
+
+        File name:	srda.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                {typ} astsrv();		/* AST service function */
+                word status;		/* Returned DSW */
+
+                status = srda(astsrv);
+
+
+        Notes
+
+        Call with NULL pointer to turn off receive data AST's.
+        [end]
+
+
+
+
+
+
+        
+        .hl 1 ^&Send by Reference\&
+
+
+                                    ********
+                                    * SREF *
+                                    ********
+
+
+
+        File name:	sref.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <wdbdf.h>	/* WDB definition */
+                rad50 tsknam[2];	/* Receiver task name */
+                word eflag;		/* Event flag number */
+                struct wdb winblk;	/* Window definition block */
+                word status;		/* Returned DSW */
+
+                status = sref(tsknam, _&winblk, eflag);
+        [end]
+        
+        .hl 1 ^&Specify Requested Exit AST\&
+
+
+                                    ********
+                                    * SREX *
+                                    ********
+
+
+
+        File name:	srex.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                {typ} astsrv();		/* AST service routine */
+                word status;		/* Returned DSW */
+
+                status = srex(astsrv);
+
+        [end]
+        
+        .hl 1 ^&Specify Receive-by-Reference AST\&
+
+
+                                    ********
+                                    * SRRA *
+                                    ********
+
+
+
+
+
+
+
+
+
+        File name:	srra.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                {typ} astsrv();		/* AST service function */
+                word status;		/* Returned DSW */
+
+                status = srra(astsrv);
+
+
+        Notes
+
+                Call  with NULL pointer to turn off receive by reference
+                AST's.
+        [end]
+        
+        .hl 1 ^&Set System Time\&
+
+
+                                    ********
+                                    * STIM *
+                                    ********
+
+
+
+        File name:	stim.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <timbuf.h>	/* Time param's struct */
+                struct timbuf newtim;	/* New time */
+                struct timbuf oldtim;	/* Old time */
+                word status;		/* Returned DSW */
+
+                status = stim(_&newtim, _&oldtim);
+
+
+        Notes
+
+                Second parameter may be zero if no old time needed.
+        [end]
+        
+        .hl 1 ^&Stop on Logical-OR of Event FLags\&
+
+
+                                    ********
+                                    * STLO *
+                                    ********
+
+
+
+        File name:	stlo.mac
+
+
+
+
+
+
+        Usage
+
+                _#include <cx.h>
+                word msk;		/* 16 bit mask word */
+                word status;		/* Returned DSW */
+
+                status = stlo0(msk);	/* Stop on flags 1-16 */
+                status = stlo1(msk);	/* Stop on flags 17-32 */
+                status = stlo2(msk);	/* Stop on flags 33-48 */
+                status = stlo3(msk);	/* Stop on flags 49-64 */
+                status = stlo4(msk);	/* Stop on flags 65-80 */
+                status = stlo5(msk);	/* Stop on flags 81-96 */
+
+
+        Notes
+
+                DEC chose not to make the group parameter a variable. It
+                is fixed at assembly time regardless of the form of  the
+                macro!!  Soooo,  there  are 6 entry points for stlo, one
+                for each group of event flags.
+
+        [end]
+        
+        .hl 1 ^&Stop Current Task\&
+
+
+                                    ********
+                                    * STOP *
+                                    ********
+
+
+
+        File name:	stop.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = stop();
+        [end]
+        
+        .hl 1 ^&Stop on Single Event Flag\&
+
+
+                                    ********
+                                    * STSE *
+                                    ********
+
+
+
+        File name:	stse.mac
+
+
+        Usage
+
+
+
+
+
+
+                _#include <cx.h>
+                word eflag;		/* Event flag number */
+                word status;		/* Returned DSW */
+
+                status = stse(eflag);
+
+        [end]
+        
+        .hl 1 ^&Unmap Address Window\&
+
+
+                                    ********
+                                    * UMAP *
+                                    ********
+
+
+
+        File name:	umap.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                _#include <wdbdf.h>
+                struct wdb winblk;	/* WDB */
+                word status;		/* Returned DSW */
+
+                status = umap(_&winblk);
+        [end]
+        
+        .hl 1 ^&Unstop Task\&
+
+
+                                    ********
+                                    * USTP *
+                                    ********
+
+
+
+        File name:	ustp.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                rad50 tsknam[2];	/* RAD50 task name */
+                word status;		/* Returned DSW */
+
+                status = ustp(tsknam);
+
+        [end]
+        
+        .hl 1 ^&Wait for Significant Event\&
+
+
+                                    ********
+
+
+
+
+
+
+                                    * WSIG *
+                                    ********
+
+
+
+        File name:	wsig.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word status;		/* Returned DSW */
+
+                status = wsig();
+
+        [end]
+        
+        .hl 1 ^&Wait for Logical-OR of Event Flags\&
+
+
+                                    ********
+                                    * WTLO *
+                                    ********
+
+
+
+        File name:	wtlo.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word msk;		/* 16 bit mask word */
+                word status;		/* Returned DSW */
+
+                status = wtlo0(grp, msk); /* Wait on flags  1-16 */
+                status = wtlo1(grp, msk); /* Wait on flags 17-32 */
+                status = wtlo2(grp, msk); /* Wait on flags 33-48 */
+                status = wtlo3(grp, msk); /* Wait on flags 49-64 */
+                status = wtlo4(grp, msk); /* Wait on flags 65-80 */
+                status = wtlo5(grp, msk); /* Wait on flags 81-96 */
+
+
+        Notes
+
+                DEC chose not to make the grp parameter a  variable.  It
+                is  set  at  assembly time regardless of the form of the
+                macro used. Therefore, there are 6 separate entries  for
+                wtlo, one per group.
+
+        [end]
+        
+        .hl 1 ^&Wait for Single Event Flag\&
+
+
+                                    ********
+
+
+
+
+
+
+                                    * WTSE *
+                                    ********
+
+
+
+        File name:	wtse.mac
+
+
+        Usage
+
+                _#include <cx.h>
+                word eflag;		/* Event flag number */
+                word status;		/* Returned DSW */
+
+                status = wtse(eflag);
+
+        [end]
+        
+        .hl 1 ^&Profile support entry module (with trace) for ast's\&
+
+
+                                   *********
+                                   * trace *
+                                   *********
+
+
+
+        File name:	apcsv.mac
+
+
+        Usage
+
+                _#include <stdio.h>
+                extern	FILE	*$$flow;
+
+                $$flow = fopen("trace.out", "w");
+
+                /* or $$flow = stderr; to trace to the console	*/
+                _...
+                $$flow = NULL;		/* Turn off flow trace	*/
+
+        ##Internal
+
+                jsr	r5,pcsv$
+                _.word	name		; Pointer to name
+
+                Where name has the structure:
+
+                name:	.word	0	; Counter
+                	.asciz	/name/	; function name
+
+        Description
+
+                This  module  is  called  whenever  a  function that was
+                compiled with the profile option is executed.  It checks
+                that the stack will remain  above  600  octal  when  the
+
+
+
+
+
+
+                function  executes  and  optionally prints a flow-trace.
+                It is a modified version of the pcsv() function  in  the
+                DECUS C library which saves R0 so that C routines may be
+                used as RSX-11 AST service routines.
+
+                For  more information on C AST service routines, see the
+                astset() documentation and the AST usage information  in
+                the CX library manual.
+
+                If  $$flow  is  set  to  a file descriptor, the function
+                name, location the function  is  called  from,  and  the
+                calling  environment,  are  printed  on  each  call to a
+                function compiled with the profile option.
+
+                The output format is:
+
+                	function__name<TAB>caller<TAB>environment
+
+                Where function__name is the name of the  function  being
+                called,  caller  is  the  address of the calling program
+                (actually, the return address), and environment  is  the
+                R5  argument  pointer  (for  local addressing within the
+                routine being called). The information will  be  written
+                to $$flow with a newline before and after.
+
+                If  profiling has been enabled and the program exits via
+                error() or via an  operating-system  trap  (such  as  an
+                illegal   memory   reference),   a   register  dump  and
+                subroutine trace will be written to stderr.
+
+                See the description of calltrace() for details.
+
+        Internal
+
+                See acsv$ for details of the calling environment.
+
+                When this routine is entered for the first time, it sets
+                up to intercept synchronous system traps, and loads  the
+                error exit address and profile pointer. The trap service
+                routines  are in the "traps" module. See the description
+                there for more information.
+
+        Bugs
+
+        [end]
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
