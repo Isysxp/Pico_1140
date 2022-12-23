@@ -65,7 +65,7 @@ PDP8 Emulator<BR>
 ->R 200 (need ucase)<BR>
 
 . (now you are running the 4K PDP-8 DMS system.)<BR>
-.FCL
+.FCL<BR>
 CONGRATULATIONS!!
 YOU HAVE SUCCESSFULLY LOADED 'FOCAL,1969' ON A PDP-8 COMPUTER.
 
