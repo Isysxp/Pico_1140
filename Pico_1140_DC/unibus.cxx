@@ -10,8 +10,8 @@ extern KB11 cpu;
 
 void UNIBUS::write16(const uint32_t a, const uint16_t v) {
     if  (a & 1) {
-        //printf("unibus: write16 to odd address %06o\n", a);
-        trap(INTBUS);
+        printf("unibus: write16 to odd address %06o\n", a);
+        cpu.trapat(INTBUS);
     }
     if (a < MEMSIZE) {
         core[a >> 1] = v;
@@ -52,15 +52,20 @@ void UNIBUS::write16(const uint32_t a, const uint16_t v) {
         cpu.mmu.write16(a, v);
         return;
     default:
+        if (a == 0772516) {
+            cpu.mmu.SR[3] = v;
+            return;
+        }
         //printf("unibus: write to invalid address %06o\n", a);
-        trap(INTBUS);
+        cpu.trapat(INTBUS);
     }
+    return;
 }
 
 uint16_t UNIBUS::read16(const uint32_t a) {
     if (a & 1) {
-        //printf("unibus: read16 from odd address %06o\n", a);
-        trap(INTBUS);
+        printf("unibus: read16 from odd address %06o\n", a);
+        cpu.trapat(INTBUS);
     }
     if (a < MEMSIZE) {
         return core[a >> 1];
@@ -90,12 +95,11 @@ uint16_t UNIBUS::read16(const uint32_t a) {
     case 0772300:
     case 0777600:
         return cpu.mmu.read16(a);
-    case 0777700:
-        return 0;
     default:
         //printf("unibus: read from invalid address %06o\n", a);
-        trap(INTBUS);
+        cpu.trapat(INTBUS);
     }
+    return 0;
 }
 
 void UNIBUS::reset() {

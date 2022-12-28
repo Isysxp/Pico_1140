@@ -12,7 +12,7 @@ class KT11 {
     template <bool wr>
     inline uint32_t decode(const uint16_t a, const uint16_t mode) {
         if ((SR[0] & 1) == 0) {
-            return a > 0167777 ? ((uint32_t)a) + 0600000 : a;
+            return a > 0157777 ? ((uint32_t)a) + 0600000 : a;
         }
         const auto i = (a >> 13);
  
