@@ -50,9 +50,9 @@ void rlready();
 void loadboot();
 
 private:
-    uint16_t drive, drun;
-    uint16_t RLBA, RLDA, RLMP, RLCS, RLBAE;
-    uint16_t RLWC;
+    uint16_t drive, drun, dtype;
+    uint16_t RLWC, RLDA, RLMP, RLCS, RLBAE;
+    uint32_t RLBA;
     UINT bcnt;
 
 #define BOOT_START      02000                           /* start */

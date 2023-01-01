@@ -118,7 +118,7 @@ uint16_t RL11::read16(uint32_t a)
         return (RLBA & 0600000) >> 16;
     default:
         //printf("%% rl11::read16 invalid read");
-        cpu.trapat(INTBUS);
+        trap(INTBUS);
         //panic();
         return 0;
     }
@@ -136,7 +136,7 @@ void RL11::rlnotready()
 void RL11::rlready()
 {
     //RLDS |= 1 << 6;
-    RLCS |= 1 << 7;
+    RLCS |= (1 << 7) | 1;
     if (RLCS & (1 << 6))
     {
         cpu.interrupt(INTRL, 5);
@@ -205,12 +205,12 @@ retry:
             cpu.unibus.write16(RLBA, val);
         }
         RLBA += 2;
-        RLWC = (RLWC + 1) & 0xFFFF;
+        RLWC++;
+        RLMP++;
         i++;                            // Count of words transferred
     }
     i &= 0377;
     val = 0;
-    RLMP = (RLMP + wc) & 0177777;
     if (w && !RLMP) {                   // If write AND IO complete (RLMP==0) fill remaining words in sector with zeros.
         if (i)
             for (i=i;i<256;i++)
@@ -244,11 +244,12 @@ void RL11::write16(uint32_t a, uint16_t v)
             {
             case 0:                     // NOP
             case 1:                     // Write check (ignored)
+                rlready();
                 break;
             case 2:                     // Get status
                 RLCS &= 01777;          // Clear error flags
                 if (RLDA & 2) {         // Do get status
-                    RLMP = 0235;        // Heads out/On track/RL02
+                    RLMP = dtype;        // Heads out/On track/RL02
                     rlready();          // Immediate ready
                 }
                 break;
@@ -262,7 +263,7 @@ void RL11::write16(uint32_t a, uint16_t v)
             case 5:
             case 6:                    // Read or Write
                 RLWC = RLMP;
-                drun = 10;             // Defer xfer by 10 cpu cycles
+                drun = 100;             // Defer xfer by 100 cpu cycles
                 RLCS &= ~1;            // Clear Ready
                 break;
             default:
@@ -285,7 +286,7 @@ void RL11::write16(uint32_t a, uint16_t v)
         break;
     default:
         //printf("%% rlwrite16: invalid write");
-        cpu.trapat(INTBUS);
+        trap(INTBUS);
         //panic();
     }
 }
@@ -297,6 +298,9 @@ void RL11::reset()
     RLDA = 0;
     RLMP = 0;
     drun = 0;
+    dtype = 035;           // RL01
+    if (f_size(&rl02) > 6000000)
+        dtype = 0235;         // RL02
 }
 
 

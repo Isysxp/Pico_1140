@@ -102,32 +102,33 @@ uint16_t binload(const char* fnm)
     return rsl;
 }
 
-void setup(char *disk) {
+void setup( char *rkfile, char *rlfile, int bootdev)
+ {
 
-    if (strstr(disk,"maindec")) {
-        cpu.reset(0200);
+    if (strstr(rkfile,"maindec")) {
+        cpu.reset(0200,0);
         //cpu.print=true;           // Uncomment to start continuous print of cpu steps
-        if (binload(disk))
+        if (binload(rkfile))
             printf("Load fail\r\n");
         else
-            printf("Loaded tape:%s\r\n",disk);
+            printf("Loaded tape:%s\r\n",rkfile);
         return;
     }
 	if (cpu.unibus.rk11.rk05.obj.lockid)
 		return;
-	FRESULT fr = f_open(&cpu.unibus.rl11.rl02, "rt11v.dsk", FA_READ | FA_WRITE);
+	FRESULT fr = f_open(&cpu.unibus.rl11.rl02,rlfile, FA_READ | FA_WRITE);
 	if (FR_OK != fr && FR_EXIST != fr) {
-		printf("f_open(%s) error: %s (%d)\n", disk, FRESULT_str(fr), fr);
+		printf("f_open(%s) error: %s (%d)\n", rlfile, FRESULT_str(fr), fr);
 		while (1) ;
 	}
-    fr = f_open(&cpu.unibus.rk11.rk05, disk, FA_READ | FA_WRITE);
+    fr = f_open(&cpu.unibus.rk11.rk05, rkfile, FA_READ | FA_WRITE);
 	if (FR_OK != fr && FR_EXIST != fr) {
-		printf("f_open(%s) error: %s (%d)\n", disk, FRESULT_str(fr), fr);
+		printf("f_open(%s) error: %s (%d)\n", rkfile, FRESULT_str(fr), fr);
 		while (1) ;
 	}
     clkdiv = (uint64_t)1000000 / (uint64_t)60;
     systime = time_us_64();
-	cpu.reset(02002);
+	cpu.reset(02002,bootdev);
     printf("Ready\n");
     
 }
@@ -150,7 +151,7 @@ void loop() {
 void loop0() {
     while (true) {
             cpu.step();
-        if ((cpu.itab[0].vec > 0) && (cpu.itab[0].pri >= cpu.priority())) {
+        if ((cpu.itab[0].vec > 0) && (cpu.itab[0].pri > cpu.priority())) {
             cpu.trapat(cpu.itab[0].vec);
             cpu.popirq();
             return; // exit from loop to reset trapbuf
@@ -169,8 +170,9 @@ void loop0() {
     }
 }
 
-int startup(int argc, char *argv) {
-    setup(argv);
+int startup( char *rkfile, char *rlfile, int bootdev)
+{
+    setup(rkfile,rlfile,bootdev);
     while (1)
         loop();
 }

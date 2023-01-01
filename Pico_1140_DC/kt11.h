@@ -53,6 +53,7 @@ class KT11 {
             //       "length "
             //       "%03o\r\n",
             //       a, block, pages[mode][i].len());
+            SR[0] |= 0200;
             trap(0250); // intfault
         }
         if constexpr (wr) {

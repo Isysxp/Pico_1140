@@ -32,12 +32,16 @@ uint16_t RK11::read16(const uint32_t a) {
     case 0777406:
         // 777406 Word Count
         return rkwc;
+    case 0777410:
+        // Bus address
+        return rkba;
     case 0777412:
         return rkda;
     default:
-        // printf("rk11::read16 invalid read %06o\n", a);
+        //printf("rk11::read16 invalid read %06o\n", a);
         trap(INTBUS);
     }
+    return 0;
 }
 
 void RK11::rknotready() {
@@ -65,6 +69,7 @@ void RK11::step() {
         break;
     case 1: // write
     case 2: // read
+    case 3:
         rknotready();
         seek();
         readwrite();

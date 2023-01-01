@@ -10,11 +10,12 @@
 
 void disasm(uint32_t ia);
 
-void KB11::reset(uint16_t start) {
+void KB11::reset(uint16_t start,int bootdev) {
     for (auto i = 0; i < 29; i++) {
         unibus.write16(02000 + (i * 2), bootrom[i]);
     }
-    //unibus.rl11.loadboot();           // Uncomment to directly boot RL02
+    if (bootdev)
+        unibus.rl11.loadboot();           // Overlay RK05 boot
     R[7] = start;
     stacklimit = 0xff;
     switchregister = 0173030;
@@ -251,14 +252,14 @@ void KB11::FIS(const uint16_t instr)
         bfr.xflt = op1 - op2;
         break;
     case 020:
-        bfr.xflt = (op1 * op2) / 4.0;
+        bfr.xflt = (op1 * op2) / 4.0f;
         break;
     case 030:
         if (op2 == 0.0) {
             PSW |= (FLAGN | FLAGV | FLAGC);
             trap(INTFIS);
         }
-        bfr.xflt = (op1 / op2) * 4.0;
+        bfr.xflt = (op1 / op2) * 4.0f;
         break;
     }
     R[instr & 7] += 4;
@@ -371,7 +372,7 @@ void KB11::RTS(const uint16_t instr) {
 
 // MFPT 000007
 void KB11::MFPT() {
-    trapat(010); // not a PDP11/44
+    trap(010); // not a PDP11/44
 }
 
 // RTI 000004, RTT 000006
@@ -793,7 +794,7 @@ void KB11::step() {
         //printf("invalid 17xxxx FPP instruction\n");
         //return;
         //printstate();
-        trapat(INTINVAL);
+        trap(INTINVAL);
     }
 }
 

@@ -9,7 +9,7 @@ enum { FLAGN = 8, FLAGZ = 4, FLAGV = 2, FLAGC = 1 };
 class KB11 {
   public:
     void step();
-    void reset(uint16_t start);
+    void reset(uint16_t start, int bootdev);
 
     void trapat(uint16_t vec);
 
@@ -36,6 +36,10 @@ class KB11 {
         uint8_t vec;
         uint8_t pri;
     };
+    // Masks for mapping registers in the I/O page. This is to correct a fundmental fault in the emulation.
+#define regmsk 0177770
+#define regadr 0170070
+
 
     std::array<intr, 32> itab;
 
@@ -86,7 +90,7 @@ class KB11 {
     template <auto len> inline uint16_t DA(const uint16_t instr) {
         static_assert(len == 1 || len == 2);
         if (!(instr & 070)) {
-            return 0177700 | (instr & 7);
+            return regadr | (instr & 7);
         }
         return fetchOperand<len>(instr);
     }
@@ -165,7 +169,7 @@ class KB11 {
 
     template <auto l> constexpr inline uint16_t read(const uint16_t a) {
         static_assert(l == 1 || l == 2);
-        if ((a & 0177770) == 0177700) {
+        if ((a & regmsk) == regadr)  {
             if constexpr (l == 2) {
                 return R[a & 7];
             } else {
@@ -188,7 +192,7 @@ class KB11 {
         if (a == 0177776)
             vl &= 01777757;
 
-        if ((a & 0177770) == 0177700) {
+        if ((a & regmsk) == regadr) {
             auto r = a & 7;
             if constexpr (l == 2) {
                 R[r] = vl;

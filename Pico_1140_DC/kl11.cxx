@@ -74,6 +74,9 @@ void KL11::poll()
 		{
 			cpu.interrupt(INTTTYOUT, 4);
 		}
+	} else {
+			if ((xcsr & 0300) == 0300)
+			cpu.interrupt(INTTTYOUT, 4);
 	}
 }
 
@@ -93,7 +96,7 @@ uint16_t KL11::read16(uint32_t a)
 	case 0777564:
 		return xcsr;
 	case 0777566:
-		return 0;
+		return xbuf;
 	default:
 		// printf("kl11: read from invalid address %06o\n", a);
 		trap(INTBUS);
@@ -119,12 +122,9 @@ void KL11::write16(uint32_t a, uint16_t v)
 			xcsr |= v & (0x40);
 		else
 			xcsr &= ~(0x40);
-		if ((xcsr & 0300) == 0300)
-			cpu.interrupt(INTTTYOUT, 4);
 		break;
 	case 0777566:
 		xbuf = v & 0x7f;
-	KL11:
 		serial_putchar(xbuf);
 		xbuf |= 0200; // Allow for nulls !!!!
 		xcsr &= ~0x80;

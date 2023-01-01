@@ -11,7 +11,7 @@
 //
 #include "hw_config.h"
 
-int startup(int argc, char *argv);
+int startup( char *rkfile, char *rlfile, int bootdev);
 
 using namespace std;
 char *ReadLine(bool fullDuplex = true, char lineBreak = '\n');
@@ -82,7 +82,8 @@ static void run_ls() {
 }
 
 int main() {
-	char *bfr;
+	char *bfr,rkfile[32],rlfile[32];
+	int bootdev=0;
 
 	set_sys_clock_khz(200000, true);
 	stdio_flush();
@@ -95,11 +96,21 @@ int main() {
 		panic("f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
 	
 	run_ls();
-	printf("Enter index of image:");
+	printf("Enter index of RK05 image:");
 	bfr = ReadLine(true, '\r');
 	sscanf(bfr, "%d", &SelFile);
-	char arr[Fnames[SelFile - 1].length() + 1]; 
-	strcpy(arr, Fnames[SelFile - 1].c_str());
-	printf("\nBooting file:%s\r\n", arr);
-	startup(1, arr);
+	strcpy(rkfile, Fnames[SelFile - 1].c_str());
+	printf("\nEnter index of RL01/2 image:");
+	bfr = ReadLine(true, '\r');
+	sscanf(bfr, "%d", &SelFile);
+	strcpy(rlfile, Fnames[SelFile - 1].c_str());
+	printf("\nBoot: RK/RL:");
+	bfr = ReadLine(true, '\r');
+	if (bfr[1]=='l' || bfr[1]=='L')
+	   bootdev=1;
+	if (bootdev)
+		printf("\nBooting file:%s on RL0:\r\n", rlfile);
+	else
+		printf("\nBooting file:%s on RK0:\r\n", rkfile);
+	startup(rkfile,rlfile,bootdev);
 }

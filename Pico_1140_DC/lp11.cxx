@@ -41,6 +41,9 @@ void LP11::write16(uint32_t a, uint16_t v) {
         } else {
             lps &= ~(1 << 6);
         }
+        if (lps & (1 << 6)) {
+            cpu.interrupt(0200, 4);
+        }
         break;
     case 0777516:
         lpb = v & 0x7f;

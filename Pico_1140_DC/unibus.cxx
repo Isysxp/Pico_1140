@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <stdint.h>
 #include <stdio.h>
-
 #include "avr11.h"
 #include "kb11.h"
 #include "unibus.h"
@@ -10,8 +9,8 @@ extern KB11 cpu;
 
 void UNIBUS::write16(const uint32_t a, const uint16_t v) {
     if  (a & 1) {
-        printf("unibus: write16 to odd address %06o\n", a);
-        cpu.trapat(INTBUS);
+        //printf("unibus: write16 to odd address %06o\n", a);
+        trap(INTBUS);
     }
     if (a < MEMSIZE) {
         core[a >> 1] = v;
@@ -57,15 +56,15 @@ void UNIBUS::write16(const uint32_t a, const uint16_t v) {
             return;
         }
         //printf("unibus: write to invalid address %06o\n", a);
-        cpu.trapat(INTBUS);
+        trap(INTBUS);
     }
     return;
 }
 
 uint16_t UNIBUS::read16(const uint32_t a) {
     if (a & 1) {
-        printf("unibus: read16 from odd address %06o\n", a);
-        cpu.trapat(INTBUS);
+        //printf("unibus: read16 from odd address %06o\n", a);
+        trap(INTBUS);
     }
     if (a < MEMSIZE) {
         return core[a >> 1];
@@ -97,7 +96,7 @@ uint16_t UNIBUS::read16(const uint32_t a) {
         return cpu.mmu.read16(a);
     default:
         //printf("unibus: read from invalid address %06o\n", a);
-        cpu.trapat(INTBUS);
+        trap(INTBUS);
     }
     return 0;
 }
@@ -105,6 +104,7 @@ uint16_t UNIBUS::read16(const uint32_t a) {
 void UNIBUS::reset() {
     cons.clearterminal();
     rk11.reset();
+    rl11.reset();
     kw11.write16(0777546, 0x00); // disable line clock INTR
     lp11.reset();
     cpu.mmu.SR[0]=0;

@@ -13,7 +13,7 @@ const uint32_t MEMSIZE = (128+64) * 1024;
 class UNIBUS {
 
   public:
-	std::array<uint16_t, (MEMSIZE/2)> core;
+	uint16_t core[MEMSIZE/2];
 
     KL11 cons;
     RK11 rk11;
