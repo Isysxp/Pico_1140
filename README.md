@@ -82,6 +82,20 @@ See PDP8.COM for the command lines to build this app and PDP8.C for the source c
 Have fun, Ian Schofield Dec 2022.
 
 
-
+Update Jan 2023
+ I have committed a substantial update to the code base which has been in test for some time.<br>
+ The major features are:<br>
+ 1. Added an RL01/2 handler. The image and boot device can be selcted from the initial dialogues.<br>
+ 2. Updated a significant problem with register mapping into I/O space. This is only a partial fix. See KB11.H for the apparently trivial changes.<br>
+ 3. Minor changes to other handlers to allow for the below.<br>
+ 4. Added a suitable minimal RSTS/E image which is built to use the FIS instruction set.<br>
+ 5. Added a suitable minimal Multi-User BASIC image.<br>
+ 
+ It has turned out to be quite complex to allow for the function of UNIX/RT11/RSTS/MUBAS as they all have some interesting differences.<br>
+ Due to the changes, it remains possible that something will have broken.<br>
+ Any comments welcome.
+  
+ Ian Schofield Jan 2023
+  
 
 
