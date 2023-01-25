@@ -97,5 +97,29 @@ Update Jan 2023
   
  Ian Schofield Jan 2023
   
-
+ Update Jan 2023<br>
+ This is a major update with many minor change. The most important point is that the app has now gone multi-user!<br>
+ I have added and extra DL11 interface. If you use a SparkFun board, upload the .uf2 in the images directory.<br>
+ 2 comm ports will appear ... connect a terminal instance to both of them.
+ For thse who wish to build the code .... edit tusb_config.h in Pico-SDK\src\rp2_common\pico_stdio_usb\include\<br>
+ #define CFG_TUD_CDC             (2)<br>
+ (I hope this works for you)<br>
+ This required quite a lot of changes to the app and to the supported operating systems:<br>
+ 1. RT11. RT11_V5_CFB: Fortran/Basic/C.<br>
+ 2. RT11_V5_MUBasic: Multi user basic. Boot to RT11XM and run MUBASX. Type '2user' for the config file.<br>
+ 3. Unix_V6: I have rebuilt the kernel to add an extra DL11 device. You should see a login in both terminal windows.<br>
+ 4. RSX_31_Fortran: This image boot RSX11/M in 2 user mode. This is a very complex OS. Best of luck!<br>
+ 5. MINC_BASIC is as before and boots to a 'READY' prompt.<br>
+ 6. Rsts_DL: This boot Rsts/E in multi user mode. A bit easier to use than RSX/11.<br>
+ <br>
+ You may note that these operating system have one thing in common (except Unix) ... this is BASIC.<br>
+ The history and logic behind this is very interesting in that DEC's view of the language to use was Basic!. This was at a time just prior to c
+ appearing and it was believed that Fortran was not the language of the future. As it happens, I am a Basic fan and I still use VB.Net for
+ a number of projects. But c was in the pipeline and one of the RT11 disc contains DECUS c. The rest as they say is history but I have to say
+ that I am not keen on Rust etc.!
+ 
+ Ian Schofield Jan 2023
+ 
+ 
+ It is most
 
