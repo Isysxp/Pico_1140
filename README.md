@@ -116,10 +116,7 @@ Update Jan 2023
  The history and logic behind this is very interesting in that DEC's view of the language to use was Basic!. This was at a time just prior to c
  appearing and it was believed that Fortran was not the language of the future. As it happens, I am a Basic fan and I still use VB.Net for
  a number of projects. But c was in the pipeline and one of the RT11 disc contains DECUS c. The rest as they say is history but I have to say
- that I am not keen on Rust etc.!
+ that I am not keen on Rust etc.!<br>
  
  Ian Schofield Jan 2023
  
- 
- It is most
-
