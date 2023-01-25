@@ -97,9 +97,9 @@ Update Jan 2023
   
  Ian Schofield Jan 2023
   
- Update Jan 2023<br>
+ Update Jan 2023<BR>
  This is a major update with many minor change. The most important point is that the app has now gone multi-user!<br>
- I have added and extra DL11 interface. If you use a SparkFun board, upload the .uf2 in the images directory.<br>
+ I have added and extra DL11 interface. If you use a **SparkFun board**, upload the .uf2 in the images directory.<br>
  2 comm ports will appear ... connect a terminal instance to both of them.
  For thse who wish to build the code .... edit tusb_config.h in Pico-SDK\src\rp2_common\pico_stdio_usb\include\<br>
  #define CFG_TUD_CDC             (2)<br>
@@ -116,7 +116,7 @@ Update Jan 2023
  The history and logic behind this is very interesting in that DEC's view of the language to use was Basic!. This was at a time just prior to c
  appearing and it was believed that Fortran was not the language of the future. As it happens, I am a Basic fan and I still use VB.Net for
  a number of projects. But c was in the pipeline and one of the RT11 disc contains DECUS c. The rest as they say is history but I have to say
- that I am not keen on Rust etc.!<br>
+ that I am not keen on Rust etc.!<BR>
  
  Ian Schofield Jan 2023
  
