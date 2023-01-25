@@ -16,7 +16,7 @@ class RK11 {
   private:
 	uint16_t rkds, rker, rkcs, rkwc, rkba, rkda;
 	UINT bcnt;
-    uint32_t drive, sector, surface, cylinder,rkba18;
+    uint32_t drive, sector, surface, cylinder,rkba18,rkdelay;
 
     void rknotready();
     void rkready();

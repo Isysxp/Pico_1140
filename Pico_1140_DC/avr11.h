@@ -13,7 +13,9 @@ enum INTVEC {
     INTCLOCK = 0100,
     INTRK = 0220,
     INTFIS = 0244,
-    INTRL = 0160
+    INTRL = 0160,
+    INTDLR = 0300,
+    INTDLT = 0304
 };
 
 [[ noreturn ]] void trap(uint16_t num);

@@ -56,11 +56,11 @@ void RK11::rkready() {
 }
 
 void RK11::step() {
+
     if ((rkcs & 01) == 0) {
         // no GO bit
         return;
     }
-
 
     switch ((rkcs >> 1) & 7) {
     case 0:
@@ -102,13 +102,18 @@ void RK11::step() {
 }
 
 void RK11::readwrite() {
+    
     if (rkwc == 0) {
-        rkready();
+       rkready();
         if (rkcs & (1 << 6)) {
             cpu.interrupt(INTRK, 5);
         }
         return;
     }
+
+    if (rkdelay++ < 60)          // Delay READ/WRITE by 50 cpu cycles. needed for DOS/BATCH
+        return;
+    rkdelay = 0;
 
     bool w = ((rkcs >> 1) & 7) == 1;
     int i;
@@ -209,4 +214,5 @@ void RK11::reset() {
     rkba = 0;
     rkda = 0;
     drive = cylinder = surface = sector = 0;
+    rkdelay = 0;
 }

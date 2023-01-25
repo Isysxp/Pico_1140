@@ -33,19 +33,30 @@ void ls(const char *dir) {
 	else {
 		fr = f_getcwd(cwdbuf, sizeof cwdbuf);
 		if (FR_OK != fr) {
-			printf("f_getcwd error: %s (%d)\n", FRESULT_str(fr), fr);
+			printf("[f_getcwd error      ]: %s (%d)\n", FRESULT_str(fr), fr);
 			return;
 		}
 		p_dir = cwdbuf;
 	}
-	printf("Directory Listing: %s\n", p_dir);
+	printf ("\n");
+	printf ("          ____  _             _ _    ___  _    ___   \n");
+        printf ("         |  _ \\(_) ___ ___   / / |  / / || |  / _ \\  \n");
+        printf ("(\\(\\     | |_) | |/ __/ _ \\  | | | / /| || |_| | | | \n");
+        printf ("(-.-)    |  __/| | (_| (_) | | | |/ / |__   _| |_| | \n");
+        printf ("o_(\")(\") |_|   |_|\\___\\___/  |_|_/_/     |_|  \\___/  \n");
+		printf ("\n");
+        printf ("          by   Ian Schofield and Guido Lehwalder\n");
+        printf ("          with RL02 Support \n");
+	printf ("\n");
+	printf ("[Directory for *.RK05/*.RL02 ]  [%s]\n", p_dir);
+	printf ("\n");
 	DIR dj; /* Directory object */
 	FILINFO fno; /* File information */
 	memset(&dj, 0, sizeof dj);
 	memset(&fno, 0, sizeof fno);
-	fr = f_findfirst(&dj, &fno, p_dir, "*");
+	fr = f_findfirst(&dj, &fno, p_dir, "*.R*");
 	if (FR_OK != fr) {
-		printf("f_findfirst error: %s (%d)\n", FRESULT_str(fr), fr);
+		printf("[f_findfirst error   ]: %s (%d)\n", FRESULT_str(fr), fr);
 		return;
 	}
 	while (fr == FR_OK && fno.fname[0]) {
@@ -69,12 +80,13 @@ void ls(const char *dir) {
 		/* Create a string that includes the file name, the file size and the
 		 attributes string. */
 		Fnames[ndx] = fno.fname;
-		printf("Number:%d\t%s\t[%s]\t[size=%llu]\n", ++ndx, fno.fname, pcAttrib, fno.fsize);
+		printf("[%d]\t%-20s\t[%s]\t[size=%llu]\n", ++ndx, fno.fname, pcAttrib, fno.fsize);
 
 		fr = f_findnext(&dj, &fno); /* Search for next item */
 	}
 	f_closedir(&dj);
 }
+
 static void run_ls() {
 	const char *arg1 = strtok(NULL, " ");
 	if (!arg1) arg1 = "";

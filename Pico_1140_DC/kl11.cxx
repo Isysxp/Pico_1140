@@ -25,7 +25,7 @@ void KL11::clearterminal()
 	count = 0;
 }
 
-int _kbhit()
+static int _kbhit()
 {
 	return tud_cdc_available();
 }
@@ -74,7 +74,9 @@ void KL11::poll()
 		{
 			cpu.interrupt(INTTTYOUT, 4);
 		}
-	} else {
+	} 
+	else
+	{
 			if ((xcsr & 0300) == 0300)
 			cpu.interrupt(INTTTYOUT, 4);
 	}
@@ -82,7 +84,6 @@ void KL11::poll()
 
 uint16_t KL11::read16(uint32_t a)
 {
-	int i;
 
 	switch (a)
 	{
@@ -90,8 +91,6 @@ uint16_t KL11::read16(uint32_t a)
 		return rcsr;
 	case 0777562:
 		rcsr &= ~0x80;
-		if (rbuf == 13)
-			i = 0;
 		return rbuf;
 	case 0777564:
 		return xcsr;
@@ -108,20 +107,13 @@ void KL11::write16(uint32_t a, uint16_t v)
 	switch (a)
 	{
 	case 0777560:
-		if (v & 0x40)
-			rcsr |= v & (0x40);
-		else
-			rcsr &= ~(0x40);
+		rcsr = ((rcsr & 0200) ^ (v & ~0200));
 		break;
 	case 0777562:
 		rcsr &= ~0x80;
 		break;
 	case 0777564:
-		// printf("kl11:write16: %06o %06o\n", a, v);
-		if (v & 0x40)
-			xcsr |= v & (0x40);
-		else
-			xcsr &= ~(0x40);
+		xcsr = ((xcsr & 0200) ^ (v & ~0200));
 		break;
 	case 0777566:
 		xbuf = v & 0x7f;

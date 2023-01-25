@@ -5,6 +5,7 @@
 #include "pc11.h"
 #include "lp11.h"
 #include "rl11.h"
+#include "dl11.h"
 #include <stdint.h>
 
 const uint32_t IOBASE_18BIT = 0760000;
@@ -21,6 +22,7 @@ class UNIBUS {
     PC11 ptr;
     LP11 lp11;
     RL11 rl11;
+    DL11 dl11;
 
     void write16(uint32_t a, uint16_t v);
     uint16_t read16(uint32_t a);

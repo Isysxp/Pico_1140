@@ -19,7 +19,7 @@ void KB11::reset(uint16_t start,int bootdev) {
     R[7] = start;
     stacklimit = 0xff;
     switchregister = 0173030;
-    //switchregister = 0;
+    switchregister = 0;
     unibus.reset();
     wtstate = false;
 }
@@ -438,8 +438,6 @@ void KB11::step() {
         mmu.SR[2] = PC;
     if (print)
         printstate();
-//    if (wtstate)
-//        return;
 
     switch (instr >> 12) {    // xxSSDD Mostly double operand instructions
     case 0:                   // 00xxxx mixed group

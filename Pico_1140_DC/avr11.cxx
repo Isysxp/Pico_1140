@@ -150,16 +150,18 @@ void loop() {
 
 void loop0() {
     while (true) {
-            cpu.step();
         if ((cpu.itab[0].vec > 0) && (cpu.itab[0].pri > cpu.priority())) {
             cpu.trapat(cpu.itab[0].vec);
             cpu.popirq();
             return; // exit from loop to reset trapbuf
         }
+        if (!cpu.wtstate)
+           cpu.step();
         cpu.unibus.rk11.step();
         cpu.unibus.rl11.step();
         if (kbdelay++ == 500) {
             cpu.unibus.cons.poll();
+            cpu.unibus.dl11.poll();
             kbdelay = 0;
         }
         nowtime = time_us_64();

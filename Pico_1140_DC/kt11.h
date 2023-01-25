@@ -77,6 +77,6 @@ class KT11 {
         inline bool ed() { return pdr & 8; }
     };
 
-    std::array<std::array<struct page, 8>, 4> pages;
+    std::array<std::array<struct page, 16>, 4> pages;
     void dumppages();
 };

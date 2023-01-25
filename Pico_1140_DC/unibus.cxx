@@ -23,6 +23,13 @@ void UNIBUS::write16(const uint32_t a, const uint16_t v) {
     case 0774400:
         rl11.write16(a, v);
         return;
+    case 0776500:
+        switch (a & ~7) {
+        case 0776500:
+            dl11.write16(a, v);
+            return;
+        }
+        trap(INTBUS);
     case 0777500:
         switch (a) {
         case 0777514:
@@ -74,6 +81,12 @@ uint16_t UNIBUS::read16(const uint32_t a) {
         return rk11.read16(a);
     case 0774400:
 	    return rl11.read16(a);
+    case 0776500:
+        switch (a & ~7) {
+        case 0776500:
+            return dl11.read16(a);
+        }
+        trap(INTBUS);
     case 0777500:
         switch (a) {
         case 0777514:
@@ -103,6 +116,7 @@ uint16_t UNIBUS::read16(const uint32_t a) {
 
 void UNIBUS::reset() {
     cons.clearterminal();
+    dl11.clearterminal();
     rk11.reset();
     rl11.reset();
     kw11.write16(0777546, 0x00); // disable line clock INTR
