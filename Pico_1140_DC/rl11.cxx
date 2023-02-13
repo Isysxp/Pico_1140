@@ -107,7 +107,7 @@ uint16_t RL11::read16(uint32_t a)
     switch (a)
     {
     case DEV_RL_CS:  // Control Status (OR in the bus extension)
-        return RLCS | (RLBA & 0600000) >> 12;
+        return RLCS;
     case DEV_RL_MP:  // Multi Purpose
         return RLMP;
     case DEV_RL_BA:  // Bus Address
@@ -223,6 +223,7 @@ retry:
         goto retry;
     }
     RLCS |= 1;
+    RLCS = (RLCS & ~060) | ((RLBA & 0600000) >> 12);
     rlready();
     drun = 0;
 }
@@ -234,9 +235,7 @@ void RL11::write16(uint32_t a, uint16_t v)
     {
     case DEV_RL_CS:  // Control Status
         RLBA = (RLBA & 0xFFFF) | ((v & 060) << 12);
-        v &= 01776;  // writable bits
-        RLCS &= ~01776;
-        RLCS |= v;
+        RLCS = ((RLCS & 0176001) ^ (v & ~0176001));
         //printf("RLCS:%06o\r\n", (RLCS & 016)>>1);
         if ((RLCS & 0200) == 0)                // CRDY cleared
         {

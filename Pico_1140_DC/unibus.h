@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 const uint32_t IOBASE_18BIT = 0760000;
-const uint32_t MEMSIZE = (128+64) * 1024;
+const uint32_t MEMSIZE = (128+96) * 1024;
 
 class UNIBUS {
 

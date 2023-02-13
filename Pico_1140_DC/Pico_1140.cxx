@@ -98,9 +98,14 @@ int main() {
 	int bootdev=0;
 
 	set_sys_clock_khz(200000, true);
-	stdio_flush();
 	stdio_init_all();
-	while (!stdio_usb_connected()) ;
+	gpio_set_function(0, GPIO_FUNC_UART);
+    gpio_set_function(1, GPIO_FUNC_UART);
+	gpio_set_function(20, GPIO_FUNC_UART);
+    gpio_set_function(21, GPIO_FUNC_UART);
+	//while (!stdio_usb_connected()) ;
+	uart_init(uart0,9600);
+	uart_init(uart1,9600);
 	time_init();
 	sd_card_t *pSD = sd_get_by_num(0);
 	FRESULT fr = f_mount(&pSD->fatfs, pSD->pcName, 1);

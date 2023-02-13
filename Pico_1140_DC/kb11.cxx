@@ -34,8 +34,6 @@ inline uint16_t KB11::read16(const uint16_t va) {
     case 0777570:
         return switchregister;
     default:
-        if (a == 0777772)
-            printstate();
         return unibus.read16(a);
     }
 }
@@ -648,6 +646,7 @@ void KB11::step() {
             FIS(instr);
             return;
         case 6:
+            //printf("Invalid instruction:%06o\r\n",instr);
             trap(INTINVAL);
         case 7: // SOB 077Rnn
             SOB(instr);
@@ -807,6 +806,8 @@ void KB11::interrupt(uint8_t vec, uint8_t pri) {
         itab[0].pri = pri;
         return;
     }
+    if (itab[0].vec == vec)
+      return;
     uint8_t i = 0;
     for (; i < itab.size(); i++) {
         if ((itab[i].vec == 0) || (itab[i].pri < pri)) {

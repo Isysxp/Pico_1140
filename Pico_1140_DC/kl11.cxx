@@ -7,6 +7,7 @@
 #include "kl11.h"
 #include <stdio.h>
 #include "tusb.h"
+#include "pico/stdlib.h"
 
 extern KB11 cpu;
 
@@ -27,17 +28,22 @@ void KL11::clearterminal()
 
 static int _kbhit()
 {
-	return tud_cdc_available();
+	return tud_cdc_available() || uart_is_readable(uart0);
 }
 
 void KL11::serial_putchar(char c)
 {
-	tud_cdc_write_char(c);
-	tud_cdc_write_flush();
+	if (tud_cdc_connected()) {
+		tud_cdc_write_char(c);
+		tud_cdc_write_flush();
+	}
+	uart_putc(uart0,c);
 }
 char KL11::serial_getchar()
 {
-	return tud_cdc_read_char();
+	if (tud_cdc_available())
+		return tud_cdc_read_char();
+	return uart_getc(uart0);
 }
 
 void KL11::poll()

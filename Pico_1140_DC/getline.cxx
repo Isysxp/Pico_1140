@@ -32,14 +32,23 @@ const char eof = 255;           // EOF in stdio.h -is -1, but getchar returns in
 
 void serial_putchar(char c)
 {
-	tud_cdc_write_char(c);
-    tud_cdc_write_flush();
+    if (tud_cdc_connected()) {
+	    tud_cdc_write_char(c);
+        tud_cdc_write_flush();
+    }
+    uart_putc(uart0,c);
 }
 char serial_getchar()
 {
-    while (!tud_cdc_available());
-    
-	return tud_cdc_read_char();
+    while (1) {
+        busy_wait_ms(10);
+        if (tud_cdc_connected()) {
+            if (tud_cdc_available());
+	            return tud_cdc_read_char();
+        }
+        if (uart_is_readable(uart0) == true);
+	        return uart_getc(uart0);
+    }
 }
 
 /*
@@ -64,6 +73,8 @@ char *ReadLine(bool fullDuplex = true, char lineBreak = '\n') {
 
     while(1) {
         c = serial_getchar(); // expect next character entry
+        if (c == 255)
+            continue;
         if(c == eof || c == lineBreak) {
             break;     // non blocking exit
         }

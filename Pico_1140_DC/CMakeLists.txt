@@ -18,7 +18,7 @@ if (TARGET tinyusb_device)
 
     # enable usb output, disable uart output
     pico_enable_stdio_usb(Pico_1140 1)
-    pico_enable_stdio_uart(Pico_1140 0)
+    pico_enable_stdio_uart(Pico_1140 1)
 
     # create map/bin/hex/uf2 file etc.
     pico_add_extra_outputs(Pico_1140)
