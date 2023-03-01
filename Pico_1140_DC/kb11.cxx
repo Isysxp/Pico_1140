@@ -8,6 +8,19 @@
 #include "bootrom.h"
 #include "kb11.h"
 
+/*
+            ***** Update 1/3/2023 ISS *****
+            * This update resolves a fundamental design flaw which placed the
+            * CPU registers at an arbirary and umappped location in the IOPAGE.
+            * Due to the fact that any instruction can reference either a register directly eg INC R0
+            * or, using a register as an address (with optional indirection) eg INC (R0), with only 16 bits of address
+            * being passed to the read/write routines, a method of determining if the operand is a register
+            * or an address is required. The minimal implmentation of this is the use of rflag to indicate
+            * if an operand is a register or a memory address. This is set if the destination is a register and cleared if not.
+            * The flag is cleared at the beginning of each CPU step and set in DA(...).
+*/
+
+
 void disasm(uint32_t ia);
 
 void KB11::reset(uint16_t start,int bootdev) {
@@ -431,6 +444,7 @@ void KB11::SXT(const uint16_t instr) {
 
 void KB11::step() {
     PC = R[7];
+    rflag = 0;
     const auto instr = fetch16();
     if (!(mmu.SR[0] & 0160000))
         mmu.SR[2] = PC;

@@ -36,10 +36,8 @@ class KB11 {
         uint8_t vec;
         uint8_t pri;
     };
-    // Masks for mapping registers in the I/O page. This is to correct a fundmental fault in the emulation.
-#define regmsk 0177770
-#define regadr 0170070
 
+    int rflag;
 
     std::array<intr, 32> itab;
 
@@ -90,7 +88,8 @@ class KB11 {
     template <auto len> inline uint16_t DA(const uint16_t instr) {
         static_assert(len == 1 || len == 2);
         if (!(instr & 070)) {
-            return regadr | (instr & 7);
+            rflag++;
+            return (instr & 7);
         }
         return fetchOperand<len>(instr);
     }
@@ -169,10 +168,12 @@ class KB11 {
 
     template <auto l> constexpr inline uint16_t read(const uint16_t a) {
         static_assert(l == 1 || l == 2);
-        if ((a & regmsk) == regadr)  {
+
+        if (rflag) {
             if constexpr (l == 2) {
                 return R[a & 7];
-            } else {
+            }
+            else {
                 return R[a & 7] & 0xFF;
             }
         }
@@ -189,14 +190,12 @@ class KB11 {
         static_assert(l == 1 || l == 2);
         auto vl = v;
 
-        if (a == 0177776)
-            vl &= 01777757;
-
-        if ((a & regmsk) == regadr) {
+        if (rflag) {
             auto r = a & 7;
             if constexpr (l == 2) {
                 R[r] = vl;
-            } else {
+            }
+            else {
                 R[r] &= 0xFF00;
                 R[r] |= vl & 0xFF;
             }
@@ -208,7 +207,8 @@ class KB11 {
         }
         if (a & 1) {
             write16(a & ~1, (read16(a & ~1) & 0xff) | (vl << 8));
-        } else {
+        }
+        else {
             write16(a, (read16(a) & 0xFF00) | (vl & 0xFF));
         }
     }
