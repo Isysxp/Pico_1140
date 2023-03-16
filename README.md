@@ -125,4 +125,8 @@ Update Jan 2023
  Many thanks to Bruno Novak for his work on sysgening various versions of RSX11M to include Cobol, Fortran and Basic Plus 2. It became apparent that there was a significant problem with the emuation. I have traced this to the original use of 16bit IOPAGE addresses used to reference the major registers. These references did not use a valid address and bypassed the KT11 memory mapping system. This has been corrected and the details are in KB11.CXX. All of the above compilers and runtimes pass some very basic tests. At some stage, an RSX11M image wil be made available.<br><br>
  Ian Schofield Mar 2023<br>
  
+ Update Mar 2023<br>
+ Bill Saltzstein has created a battery powered Pico_11/40 with a BLE interface. Do read the enclosed paper.
+ 
+ 
  
