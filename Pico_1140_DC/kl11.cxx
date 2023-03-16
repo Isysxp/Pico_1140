@@ -51,7 +51,7 @@ void KL11::poll()
 	if (!rcvrdone())
 	{
 		// unit not busy
-		if (count++ > 20)
+		if (count++)
 			if (_kbhit() || keypressed)
 			{
 				char ch;

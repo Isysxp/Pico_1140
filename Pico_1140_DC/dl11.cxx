@@ -27,7 +27,7 @@ void DL11::clearterminal() {
 
 static int _kbhit()
 {
-	return tud_cdc_n_available(1) || uart_is_readable(uart1);
+	return tud_cdc_n_available(1); // || uart_is_readable(uart1);
 }
 
 void DL11::serial_putchar(char c)
@@ -48,11 +48,11 @@ char DL11::serial_getchar()
 void DL11::poll() {
 	if (!rcvrdone()) {
 		// unit not busy
-		if (count++ > 20)
+		if (true)
 			if (_kbhit() || keypressed) {
 				char ch = serial_getchar();
 				count = 0;
-				if (ch) {
+				if (true) {
 					rbuf = ch & 0x7f;
 					rcsr |= 0x80;
 					if (rcsr & 0x40) {
@@ -117,7 +117,7 @@ void DL11::write16(uint32_t a, uint16_t v) {
 			break;
 		case 06:
 		xbuf = v & 0x7f;
-		serial_putchar(xbuf);
+		serial_putchar(v & 0x7f);
 		xbuf |= 0200; // Allow for nulls !!!!
 		xcsr &= ~0x80;
 		iflag = 0;
