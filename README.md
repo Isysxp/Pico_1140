@@ -127,7 +127,7 @@ Update Jan 2023
  
  Update Mar 2023<br>
  Bill Saltzstein has created a battery powered Pico_11/40 with a BLE interface. Do read the enclosed paper.
- Bruno Novak has built a version of RSX11 4.2 with a C compiler and a Y2K compliant version of TIME.
+ Bruno Novak has built a version of RSX11 4.6 BL56 with a C compiler and a Y2K compliant version of TIME.
  
  
  
