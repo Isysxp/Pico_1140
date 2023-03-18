@@ -1,5 +1,5 @@
 # Pico_1140
-A PDP11/40 emulator that will run Unix v5/v6
+A PDP11/40 emulator that will run Unix v5/v6 and a number of DEC operating systems.
 
 Introduction and acknowledgements:
 
