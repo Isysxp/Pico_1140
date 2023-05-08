@@ -36,6 +36,7 @@ void DL11::serial_putchar(char c)
 		tud_cdc_n_write_char(1,c);
 		tud_cdc_n_write_flush(1);
 	}
+	while (!uart_is_writable(uart1));
 	uart_putc(uart1,c);
 }
 char DL11::serial_getchar()

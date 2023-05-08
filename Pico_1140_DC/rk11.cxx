@@ -81,7 +81,7 @@ void RK11::step() {
         rknotready();
         if (drive != 0) {
             rker |= 0x80; // NXD
-            rkcs &= ~1;
+            rkready();
         	cpu.interrupt(INTRK, 5);
             return;
         }

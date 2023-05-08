@@ -105,6 +105,7 @@ int main() {
 	gpio_set_function(20, GPIO_FUNC_UART);
     gpio_set_function(21, GPIO_FUNC_UART);
 	while (!stdio_usb_connected()) ;
+	busy_wait_ms(1000);
 	uart_init(uart0,9600);
 	uart_init(uart1,9600);
 	time_init();

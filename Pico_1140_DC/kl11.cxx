@@ -37,6 +37,7 @@ void KL11::serial_putchar(char c)
 		tud_cdc_write_char(c);
 		tud_cdc_write_flush();
 	}
+	while (!uart_is_writable(uart0));
 	uart_putc(uart0,c);
 }
 char KL11::serial_getchar()
