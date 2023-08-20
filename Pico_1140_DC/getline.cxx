@@ -43,7 +43,7 @@ char serial_getchar()
     while (1) {
         busy_wait_ms(10);
         if (tud_cdc_connected()) {
-            if (tud_cdc_available());
+            if (tud_cdc_available())
 	            return tud_cdc_read_char();
         }
         if (uart_is_readable(uart0) == true);
