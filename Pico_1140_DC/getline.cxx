@@ -46,7 +46,7 @@ char serial_getchar()
             if (tud_cdc_available())
 	            return tud_cdc_read_char();
         }
-        if (uart_is_readable(uart0) == true);
+        if (uart_is_readable(uart0) == true)
 	        return uart_getc(uart0);
     }
 }
