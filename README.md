@@ -4,7 +4,7 @@ A PDP11/40 emulator that will run Unix v5/v6 and a number of DEC operating syste
 Introduction and acknowledgements:
 
 This is an updated version of Dave Cheney's CPP11 https://github.com/davecheney/cpp11 which will run on a Pi Pico.
-For this project I have selected the Sparkfun Thing Plus board which contains an RP2040 chip, an SD card and 16Mb flash.
+For this project I have selected the Sparkfun Thing Plus board which contains an RP2040 chip, an SD card and 16MB flash.
 See https://www.sparkfun.com/products/17745.
 Other hardware may be used including a Pi Pico itself. Wire the SDCard as per the Sparkfun schematic.
 The SD card interface uses Karl Kugler's app (https://github.com/carlk3/no-OS-FatFS-SD-SPI-RPi-Pico) which is included in the repo.
