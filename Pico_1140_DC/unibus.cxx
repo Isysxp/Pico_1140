@@ -58,10 +58,6 @@ void UNIBUS::write16(const uint32_t a, const uint16_t v) {
         cpu.mmu.write16(a, v);
         return;
     default:
-        if (a == 0772516) {
-            cpu.mmu.SR[3] = v;
-            return;
-        }
         //printf("unibus: write to invalid address %06o\n", a);
         trap(INTBUS);
     }

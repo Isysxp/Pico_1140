@@ -4,8 +4,8 @@
 
 uint16_t KT11::read16(const uint32_t a) {
     // printf("kt11:read16: %06o\n", a);
-    const auto i = ((a & 037) >> 1);
-    switch (a & ~037) {
+    const auto i = ((a & 017) >> 1);
+    switch (a & ~017) {
     case 0772200:
         return pages[01][i].pdr;
     case 0772240:
@@ -26,8 +26,8 @@ uint16_t KT11::read16(const uint32_t a) {
 
 void KT11::write16(const uint32_t a, const uint16_t v) {
     //  printf("kt11:write16: %06o %06o\n", a, v);
-    const auto i = ((a & 037) >> 1);
-    switch (a & ~037) {
+    const auto i = ((a & 017) >> 1);
+    switch (a & ~017) {
     case 0772200:
         pages[01][i].pdr = v & 077416;
         break;

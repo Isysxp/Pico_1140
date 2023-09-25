@@ -88,10 +88,10 @@ int32_t sim_load(FIL *bld)
 }
 
 
-uint16_t binload(const char* fnm)
+uint16_t binload(char* fnm)
 {
     uint16_t rsl;
-
+    printf("Binload:%s\r\n",fnm);
 	FRESULT fr = f_open(&bload, fnm, FA_READ | FA_WRITE);
 	if (FR_OK != fr && FR_EXIST != fr) {
 		printf("f_open(%s) error: %s (%d)\n", fnm, FRESULT_str(fr), fr);

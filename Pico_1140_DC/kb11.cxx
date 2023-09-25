@@ -22,6 +22,7 @@
 
 
 void disasm(uint32_t ia);
+void fp11(int32 IR);
 
 void KB11::reset(uint16_t start,int bootdev) {
     for (auto i = 0; i < 29; i++) {
@@ -298,7 +299,7 @@ void KB11::MTPS(const uint16_t instr)
 void KB11::MFPS(const uint16_t instr)
 {
     const auto da = DA<1>(instr);
-    auto dst = PSW & 0377;
+    auto dst = PSW & 0357;
     if (PSW & msb<1>() && ((instr & 030) == 0)) {
         dst |= 0177400;
         write<2>(da, dst);
@@ -795,11 +796,9 @@ void KB11::step() {
     case 14: // SUB 16SSDD
         SUB(instr);
         return;
-    //case 15:
-    //    if (instr == 0170011) {
-    //        // SETD ; not needed by UNIX, but used; therefore ignored
-    //        return;
-    //    }
+     case 15:
+        fp11(instr);
+        break;
         [[fallthrough]];
     default: // 15  17xxxx FPP instructions
         //printf("invalid 17xxxx FPP instruction\n");

@@ -43,13 +43,15 @@ class KB11 {
 
     KT11 mmu;
     UNIBUS unibus;
-    bool print;
+    bool print=false;
     bool wtstate;
-
-  private:
-    std::array<uint16_t, 8> R; // R0-R7
+    uint16_t read16(uint16_t va);
+    void write16(uint16_t va, uint16_t v);
     uint16_t PC;               // holds R[7] during instruction execution
     uint16_t PSW;              // processor status word
+    uint16_t R[8]; // R0-R7
+
+  private:
     uint16_t oldPSW;
     uint16_t stacklimit, switchregister, displayregister;
     std::array<uint16_t, 4>
@@ -64,9 +66,6 @@ class KB11 {
         if (b)
             PSW |= FLAGZ;
     }
-
-    uint16_t read16(uint16_t va);
-    void write16(uint16_t va, uint16_t v);
 
     inline uint16_t fetch16() {
         const auto val = read16(R[7]);
