@@ -141,10 +141,13 @@ Update Jan 2023
  problem in that most builds on the web need an FPP to run Basic. There is just enough memory to run RSTS/E V 9.3.
  (Having said this, there is a sysgen option to use FIS if you wish).
  Further to the memory limit of the Pico, there is no point in going for 22 bit addressing. This option is being considered
- as part of a parallel build for the ESP32 with PSRAM (4Mb). This is WIP.
+ as part of a parallel build for the ESP32 with PSRAM (4Mb). This is WIP
+ 
+ In the meanwhile, have fun and try some apps that need an FPP.
+
  Ian Schofield September 2023.
  
- In the meanwhile, have fun and 
+ 
  
  
  
