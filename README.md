@@ -124,10 +124,27 @@ Update Jan 2023
  <br>
  Many thanks to Bruno Novak for his work on sysgening various versions of RSX11M to include Cobol, Fortran and Basic Plus 2. It became apparent that there was a significant problem with the emuation. I have traced this to the original use of 16bit IOPAGE addresses used to reference the major registers. These references did not use a valid address and bypassed the KT11 memory mapping system. This has been corrected and the details are in KB11.CXX. All of the above compilers and runtimes pass some very basic tests. At some stage, an RSX11M image wil be made available.<br><br>
  Ian Schofield Mar 2023<br>
+ <br>
  
  Update Mar 2023<br>
  Bill Saltzstein has created a battery powered Pico_11/40 with a BLE interface. Do read the enclosed paper.
  Bruno Novak has built a version of RSX11 4.6 BL56 with a C compiler and a Y2K compliant version of TIME.
+
+ Update September 2023
+ <br>
+ Pico_1140 now has an FP11 device! To avoid re-inventing the wheel, I have used a copy of the FP11 emulator from SIMH.
+ Please note the GPL license in the header of fp11.cxx as this was written by Bob Supnik and I would not presume to add my name next to his.
+ This is in addition to the existing FIS code in kb11.cxx. This required some minor changes to interface with the Pico_1140 environment.
+ Those of you who are DEC experts will immediately point out that the 11/40 never had an FPP and the 11/45 does not have a FIS option.
+ So, the Pico_1140 is a somewhat hybrid system. So far as I can tell, this does not seem to cause a problem.
+ The reason for adding this option is to be able to run more recent version of RSX11 and RSTS/E. RSTS/E was a particular
+ problem in that most builds on the web need an FPP to run Basic. There is just enough memory to run RSTS/E V 9.3.
+ (Having said this, there is a sysgen option to use FIS if you wish).
+ Further to the memory limit of the Pico, there is no point in going for 22 bit addressing. This option is being considered
+ as part of a parallel build for the ESP32 with PSRAM (4Mb). This is WIP.
+ Ian Schofield September 2023.
+ 
+ In the meanwhile, have fun and 
  
  
  
