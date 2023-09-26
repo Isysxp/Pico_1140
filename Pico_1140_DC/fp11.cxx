@@ -39,6 +39,7 @@
    16-Apr-98    RMS     Fixed bugs in STEXP, STCfi, round/pack
    09-Apr-98    RMS     Fixed bug in LDEXP
    04-Apr-98    RMS     Fixed bug in MODf condition codes
+   20-Sep-23    ISS     Modified for the Pico_1140 environment.
 
    This module simulates the PDP-11 floating point unit (FP11 series).
    It is called from the instruction decoder for opcodes 170000:177777.
