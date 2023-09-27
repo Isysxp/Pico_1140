@@ -662,13 +662,13 @@ int32 GeteaFW(int32 spec)
         return (adr | dsenable);
 
     case 6:                                             /* d(r) */
-        adr = ReadW(cpu.PC | isenable);
-        cpu.PC = (cpu.PC + 2) & 0177777;
+        adr = ReadW(cpu.R[7] | isenable);
+        cpu.R[7] = (cpu.R[7] + 2) & 0177777;
         return (((R[reg] + adr) & 0177777) | dsenable);
 
     case 7:                                             /* @d(R) */
-        adr = ReadW(cpu.PC | isenable);
-        cpu.PC = (cpu.PC + 2) & 0177777;
+        adr = ReadW(cpu.R[7] | isenable);
+        cpu.R[7] = (cpu.R[7] + 2) & 0177777;
         adr = ReadW(((R[reg] + adr) & 0177777) | dsenable);
         return (adr | dsenable);
     }                                               /* end switch */
