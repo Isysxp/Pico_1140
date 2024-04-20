@@ -100,6 +100,7 @@ int main() {
 
 	set_sys_clock_khz(200000, true);
 	stdio_init_all();
+	gpio_set_pulls(1,true,false);
 	gpio_set_function(0, GPIO_FUNC_UART);
     gpio_set_function(1, GPIO_FUNC_UART);
 	gpio_set_function(20, GPIO_FUNC_UART);
