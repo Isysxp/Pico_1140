@@ -61,7 +61,8 @@ void RK11::step() {
         // no GO bit
         return;
     }
-
+    // printf("CMD:%d\r\n", (rkcs >> 1) & 7);
+    rkcs &= ~0x2000;
     switch ((rkcs >> 1) & 7) {
     case 0:
         // controller reset
@@ -82,12 +83,14 @@ void RK11::step() {
         if (drive != 0) {
             rker |= 0x80; // NXD
             rkready();
-        	cpu.interrupt(INTRK, 5);
+            if (rkcs & (1 << 6))
+        	    cpu.interrupt(INTRK, 5);
             return;
         }
         seek();
-        rkcs &= ~0x2000; // Clear search complete - reset by rk11_seekEnd
+        rkcs |= 0x2000; // Set search complete - reset by rk11_seekEnd
         rkcs |= 0x80;    // set done - ready to accept new command
+        rkready();
 	    if (rkcs & (1 << 6))
         	cpu.interrupt(INTRK, 5);
         break;
@@ -171,10 +174,12 @@ void RK11::readwrite() {
             }
         }
     }
+    rkda = (cylinder << 5) | (surface << 4) | sector;
 }
 
 void RK11::seek() {
     const uint32_t pos = (cylinder * 24 + surface * 12 + sector) * 512;
+    rkda = (cylinder << 5) | (surface << 4) | sector;
 	if (FR_OK != (fr = f_lseek(&rk05, pos))) {
 		printf(("rkstep: failed to seek\r\n"));
 		while (1) ;
